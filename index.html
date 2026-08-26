@@ -1,0 +1,3185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>IKAPAY — Mali</title>
+<meta name="theme-color" content="#0c130c" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="IKAPAY" />
+<meta name="application-name" content="IKAPAY" />
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; font-family:'Outfit',sans-serif; }
+:root{
+  --green:#18b955; --green-dark:#0e7a39; --gold:#fbd013; --red:#e0203a; --info:#3aa0ff;
+  --pink:#ff4f9e; --orange:#f59e0b; --purple:#8B5CF6; --blue:#5c6dff;
+  --bg:#080b08; --bg-soft:#0d120d; --card:#12170f; --card2:#181f16;
+  --border:#232b20; --text:#f2f4ee; --sub:#8a9686;
+  --radius:18px; --radius-sm:13px;
+  --tricolor: linear-gradient(90deg, var(--green), var(--gold) 50%, var(--red));
+}
+html,body{ height:100%; background:var(--bg); color:var(--text); overflow-x:hidden; }
+body{ padding:12px; padding-bottom:84px;
+  background: radial-gradient(circle at 10% 0%, rgba(24,185,85,.08), transparent 45%),
+              radial-gradient(circle at 90% 10%, rgba(251,208,19,.05), transparent 40%),
+              var(--bg); }
+::-webkit-scrollbar{ width:0; height:0; }
+.num{ font-family:'Space Grotesk',monospace; font-variant-numeric: tabular-nums; }
+.card{ background:var(--card); border-radius:var(--radius); padding:15px; margin-bottom:10px; border:1px solid var(--border); }
+.card-accent{ border:1px solid rgba(24,185,85,.35); box-shadow:0 0 0 1px rgba(24,185,85,.06) inset; }
+.card-gold{ border:1px solid rgba(251,208,19,.4); }
+.card-danger{ border:1px solid rgba(224,32,58,.4); }
+.card-info{ border:1px solid rgba(58,160,255,.4); }
+.card-pink{ border:1px solid rgba(255,79,158,.4); }
+.card-nego{ border:1px solid rgba(245,158,11,.4); }
+.card-purple{ border:1px solid rgba(139,92,246,.4); }
+input,select,textarea{ width:100%; padding:12px 14px; margin:5px 0; border-radius:var(--radius-sm);
+  border:1px solid var(--border); background:#0f140e; color:#fff; outline:none; font-size:13.5px; }
+input:focus,select:focus,textarea:focus{ border-color:var(--green); }
+textarea{ min-height:70px; resize:vertical; }
+::placeholder{ color:#5c6a58; }
+.btn{ width:100%; padding:12px 16px; border-radius:50px; border:none; font-weight:700; font-size:13.5px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+  transition:transform .15s, opacity .15s; color:#fff; letter-spacing:.2px; }
+.btn:active{ transform:scale(.96); opacity:.88; }
+.btn-primary{ background:linear-gradient(135deg,var(--green),var(--green-dark)); color:#04140a; }
+.btn-gold{ background:linear-gradient(135deg,#ffe25c,var(--gold)); color:#241a00; }
+.btn-danger{ background:linear-gradient(135deg,#ff4d63,var(--red)); }
+.btn-info{ background:linear-gradient(135deg,#5cb6ff,var(--info)); }
+.btn-pink{ background:linear-gradient(135deg,#ff85c2,var(--pink)); }
+.btn-nego{ background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; }
+.btn-outline{ background:transparent; border:1px solid var(--border); color:var(--text); }
+.btn-sm{ padding:7px 14px; font-size:11.5px; border-radius:20px; width:auto; }
+.btn-xs{ padding:4px 10px; font-size:10px; border-radius:16px; width:auto; }
+.btn-purple{ background:linear-gradient(135deg,#8B5CF6,#6D28D9); color:#fff; }
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.grid-3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.grid-4{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; }
+.flex{ display:flex; gap:8px; align-items:center; }
+.flex-between{ display:flex; justify-content:space-between; align-items:center; }
+.gap-8{ gap:8px; }
+.badge{ font-size:9.5px; padding:3px 11px; border-radius:20px; font-weight:700; display:inline-block; }
+.badge-admin{ color:var(--red); border:1px solid var(--red); }
+.badge-agent{ color:var(--gold); border:1px solid var(--gold); }
+.badge-status{ font-size:8.5px; padding:2px 9px; border-radius:20px; font-weight:700; display:inline-block; }
+.badge-en_attente{ color:var(--gold); border:1px solid var(--gold); }
+.badge-negociation{ color:var(--orange); border:1px solid var(--orange); }
+.badge-en_cours{ color:var(--info); border:1px solid var(--info); }
+.badge-termine{ color:var(--green); border:1px solid var(--green); }
+.badge-rembourse{ color:var(--sub); border:1px solid var(--sub); }
+.badge-litige{ color:var(--red); border:1px solid var(--red); }
+.badge-fee{ background:var(--green); color:#04140a; padding:4px 13px; border-radius:20px; font-size:10.5px; font-weight:900; display:inline-block; animation:pulse 2.4s infinite; }
+@keyframes pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.045); } }
+.solde-wrap{ text-align:center; padding:6px 0 2px; }
+.solde-label{ font-size:9.5px; color:var(--sub); text-transform:uppercase; letter-spacing:2.5px; }
+.solde-amt{ font-family:'Space Grotesk',monospace; font-size:30px; font-weight:700; color:var(--green); margin:3px 0; letter-spacing:-.5px; }
+.service-btn{ height:84px; flex-direction:column; border-radius:16px !important; font-size:10.5px; font-weight:700;
+  gap:5px; color:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  width:100%; padding:8px; transition:transform .15s; }
+.service-btn:active{ transform:scale(.95); }
+.service-btn span{ font-size:24px; }
+.service-btn-chat{ background:linear-gradient(135deg,#3aa0ff,#1d6fc9); }
+.service-btn-taxi{ background:linear-gradient(135deg,#ff4d63,var(--red)); }
+.service-btn-livreur{ background:linear-gradient(135deg,#ff9a3d,#e06a00); }
+.service-btn-retrait{ background:linear-gradient(135deg,var(--green),var(--green-dark)); border:1px solid rgba(24,185,85,.5); }
+.service-btn-shop{ background:linear-gradient(135deg,#5c6dff,#2d3ba8); }
+.service-btn-grossiste{ background:linear-gradient(135deg,#8B5CF6,#6D28D9); }
+.shop-item{ background:var(--card2); border-radius:14px; overflow:hidden; border:1px solid var(--border); margin-bottom:8px; }
+.shop-item img{ width:100%; height:130px; object-fit:cover; display:block; }
+.shop-item-body{ padding:10px; }
+.shop-price{ background:var(--gold); color:#241a00; padding:2px 11px; border-radius:20px; font-weight:800; font-size:12px; display:inline-block; }
+.course-item{ background:var(--card2); border-radius:14px; padding:10px 12px; margin-bottom:6px;
+  display:flex; justify-content:space-between; align-items:flex-start; border:1px solid var(--border); font-size:12px; gap:8px; }
+.historique-item{ background:var(--card2); border-radius:10px; padding:8px 10px; margin-bottom:5px; border-left:3px solid var(--sub); font-size:11.5px; }
+.historique-item.rembourse{ border-left-color:var(--green); }
+.historique-item.litige{ border-left-color:var(--red); }
+.del-btn{ background:none; border:none; color:var(--red); font-size:15px; cursor:pointer; padding:0; line-height:1; }
+.notif-badge{ position:absolute; top:-6px; right:-6px; background:var(--red); color:#fff; border-radius:50%;
+  width:17px; height:17px; font-size:9.5px; font-weight:900; display:flex; align-items:center; justify-content:center; z-index:100; }
+.modal-full{ position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg); z-index:5000;
+  padding:16px; overflow-y:auto; display:none; animation:slideUp .28s ease; }
+@keyframes slideUp{ from{ transform:translateY(24px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+.modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.modal-close{ font-size:26px; color:var(--red); cursor:pointer; line-height:1; }
+.nav-bar{ position:fixed; bottom:0; left:0; width:100%; background:#0a0f0a; display:flex; justify-content:space-around;
+  padding:6px 0 12px; border-top:1px solid var(--border); z-index:1000; }
+.nav-btn{ font-size:9px; color:var(--sub); cursor:pointer; text-align:center; flex:1; line-height:1.5; transition:color .2s; }
+.nav-btn span{ font-size:19px; display:block; }
+.nav-btn.active{ color:var(--green); font-weight:700; }
+#toast{ position:fixed; bottom:82px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green);
+  color:#04140a; padding:9px 22px; border-radius:50px; font-weight:700; font-size:12.5px; z-index:9999; opacity:0;
+  transition:all .3s; pointer-events:none; white-space:nowrap; box-shadow:0 6px 24px rgba(0,0,0,.4); }
+#toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+#section-home{ overflow-y:auto; padding-bottom:80px; height:calc(100vh - 60px); }
+.hidden{ display:none !important; }
+.text-center{ text-align:center; }
+.text-sub{ color:var(--sub); }
+.module-header{ padding:16px 14px 14px; border-radius:16px; text-align:center; color:#fff; margin-bottom:9px; position:relative; overflow:hidden; }
+.module-header::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--tricolor); }
+.module-header h2{ margin:0; font-size:17px; font-weight:800; letter-spacing:.2px; }
+.module-header p{ font-size:11px; opacity:.88; margin:3px 0 0; }
+.module-header .tags{ display:flex; gap:5px; justify-content:center; flex-wrap:wrap; margin-top:7px; }
+.module-header .tags span{ background:rgba(255,255,255,.16); padding:2px 11px; border-radius:20px; font-size:8.5px; font-weight:600; }
+.admin-stat{ background:var(--card2); border-radius:12px; padding:11px; text-align:center; }
+.admin-stat .val{ font-family:'Space Grotesk',monospace; font-size:19px; font-weight:700; color:var(--gold); }
+.admin-stat .lbl{ font-size:9px; color:var(--sub); margin-top:3px; }
+.delai-tag{ background:rgba(224,32,58,.15); border:1px solid var(--red); border-radius:20px; padding:1px 9px; font-size:8.5px; color:var(--red); display:inline-block; }
+.en-route-badge{ background:var(--green); color:#04140a; padding:1px 9px; border-radius:20px; font-size:8.5px; animation:pulse 2s infinite; display:inline-block; font-weight:700; }
+.frais-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:5px; background:var(--card2); border-radius:12px; padding:9px; border:1px solid rgba(251,208,19,.35); margin-bottom:9px; }
+.frais-grid-item{ text-align:center; padding:4px; }
+.frais-grid-item .montant{ font-size:10px; font-weight:600; color:var(--text); }
+.frais-grid-item .frais{ font-family:'Space Grotesk',monospace; font-size:14px; font-weight:700; color:var(--gold); }
+.frais-grid-item .label{ font-size:7.5px; color:var(--sub); }
+.wa-conv-item{ display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+.wa-conv-item:active{ background:var(--card2); border-radius:12px; }
+.wa-avatar{ width:42px; height:42px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:900; color:#fff; }
+.wa-conv-preview{ font-size:10.5px; color:var(--sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px; }
+.wa-conv-time{ font-size:8.5px; color:var(--sub); }
+.wa-conv-name{ font-weight:700; font-size:12.5px; }
+.wa-chat-header{ display:flex; align-items:center; gap:9px; padding:8px 12px; background:var(--card2); border-bottom:1px solid var(--border); }
+.wa-chat-avatar{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#04140a; flex-shrink:0; background:var(--green); }
+.wa-chat-name{ font-weight:700; font-size:13.5px; }
+.wa-chat-status{ font-size:8.5px; color:var(--sub); }
+.wa-chat-box{ flex:1; overflow-y:auto; padding:10px; display:flex; flex-direction:column; gap:4px; background:#060906; height:100%; }
+.wa-msg{ padding:7px 13px; border-radius:12px; font-size:12.5px; line-height:1.35; word-break:break-word; max-width:78%; }
+.wa-msg.me{ align-self:flex-end; background:#0f4a2c; color:#fff; border-radius:12px 12px 3px 12px; }
+.wa-msg.other{ align-self:flex-start; background:var(--card2); color:var(--text); border-radius:12px 12px 12px 3px; }
+.wa-msg-time{ font-size:8.5px; color:var(--sub); margin-top:2px; padding:0 4px; }
+.vehicule-selector{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin:6px 0; }
+.vehicule-selector .v-btn{ padding:8px; border-radius:12px; border:2px solid var(--border); background:var(--card2); color:var(--text); cursor:pointer; text-align:center; font-size:10px; transition:all .2s; }
+.vehicule-selector .v-btn.active{ border-color:var(--green); background:rgba(24,185,85,.13); }
+.vehicule-selector .v-btn .icon{ font-size:21px; display:block; }
+.profile-avatar-wrap{ position:relative; width:76px; height:76px; margin:0 auto 8px; }
+.profile-avatar-img{ width:76px; height:76px; border-radius:50%; object-fit:cover; border:3px solid var(--green); }
+.profile-avatar-edit{ position:absolute; bottom:0; right:0; background:var(--green); border-radius:50%; width:23px; height:23px; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer; border:2px solid var(--bg); }
+@media (max-width:380px){ .solde-amt{ font-size:25px; } .service-btn{ height:74px; font-size:9.5px; } .service-btn span{ font-size:20px; } }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<!-- ===== AUTH ===== -->
+<div id="page-auth" class="card card-accent" style="margin-top:12%;">
+  <div style="text-align:center;margin-bottom:6px;">
+    <h1 style="font-size:28px;font-weight:900;letter-spacing:-.5px;">
+      <span style="background:var(--tricolor);-webkit-background-clip:text;background-clip:text;color:transparent;">IKAPAY</span>
+    </h1>
+    <p style="color:var(--sub);font-size:11.5px;letter-spacing:1px;text-transform:uppercase;">Mali · Taxi · Livraison · Retrait</p>
+  </div>
+  <input type="text" id="u-name" placeholder="Nom complet" />
+  <input type="tel" id="u-phone" placeholder="Numéro (+223...)" />
+  <input type="password" id="u-pin" placeholder="PIN" maxlength="10" />
+  <select id="u-role">
+    <option value="Client">👤 Client</option>
+    <option value="Chauffeur">🚕 Chauffeur / Livreur</option>
+    <option value="Agent">🏪 Agent (dépôt/retrait)</option>
+    <option value="Grossiste">📦 Grossiste</option>
+    <option value="VendeurAmbulant">🚶 Vendeur Ambulant</option>
+  </select>
+  <button class="btn btn-primary" onclick="login()" style="margin-top:8px;font-size:15px;">ACCÉDER →</button>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="main-app" class="hidden">
+  <div id="section-home">
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:9px;">
+        <div>
+          <div id="disp-name" style="font-weight:700;font-size:15px;">...</div>
+          <div id="disp-role" style="color:var(--sub);font-size:10px;"></div>
+        </div>
+        <div class="flex gap-8">
+          <span id="admin-tag" class="badge badge-admin hidden">ADMIN</span>
+          <span id="agent-tag" class="badge badge-agent hidden">AGENT</span>
+          <div style="position:relative;cursor:pointer;" onclick="openNotifications()">
+            <button style="width:34px;height:34px;padding:0;background:var(--card2);border:1px solid var(--border);border-radius:50%;font-size:14px;">🔔</button>
+            <span id="notif-badge" class="notif-badge hidden">0</span>
+          </div>
+          <button onclick="location.reload()" class="btn btn-sm btn-outline" style="font-size:9px;padding:5px 10px;">Sortir</button>
+        </div>
+      </div>
+      <div class="solde-wrap">
+        <div class="solde-label">Solde disponible</div>
+        <div class="solde-amt num" id="disp-solde">0 CFA</div>
+      </div>
+      <div class="grid-2">
+        <button class="btn btn-outline" onclick="showQR()" style="font-size:11.5px;">📱 MON QR</button>
+        <button class="btn btn-info" onclick="openLitige()" style="font-size:11.5px;">⚠️ LITIGE</button>
+      </div>
+    </div>
+    <div class="card card-gold" style="text-align:center;padding:10px;">
+      <span class="badge-fee">🔥 Frais livraison physique : 500 CFA min</span>
+      <p style="font-size:9.5px;color:var(--sub);margin:4px 0 0;">Transferts numériques : frais légers (1% / 0.5%)</p>
+    </div>
+    <div id="dashboard-pro"></div>
+    <div class="card card-pink" style="background:linear-gradient(135deg,#2a0e1c,#150810);">
+      <div class="flex-between">
+        <div>
+          <div style="font-weight:800;color:var(--pink);font-size:14px;">💍 IkaWife — Popote programmée</div>
+          <div style="font-size:10.5px;color:var(--sub);margin-top:2px;">L'argent tombe seul, chaque jour, à l'heure choisie.</div>
+        </div>
+        <span class="badge" style="color:var(--pink);border:1px solid var(--pink);white-space:nowrap;">500 CFA/mois</span>
+      </div>
+      <button class="btn btn-pink" onclick="openWife()" style="margin-top:9px;">💍 Configurer</button>
+    </div>
+    <div class="card">
+      <div class="flex-between" style="margin-bottom:9px;">
+        <h3 style="color:var(--gold);margin:0;font-size:13.5px;">🚀 SERVICES</h3>
+        <span class="badge" style="background:rgba(251,208,19,.1);color:var(--gold);border:1px solid rgba(251,208,19,.3);">0% dépôt</span>
+      </div>
+      <div class="grid-2">
+        <button class="service-btn service-btn-chat" onclick="openChat()"><span>💬</span>IkaChat</button>
+        <button class="service-btn service-btn-taxi" onclick="openTaxi()"><span>🚕</span>IkaTaxy</button>
+        <button class="service-btn service-btn-livreur" onclick="openLivreur()"><span>📦</span>IkaLivreur</button>
+        <button class="service-btn service-btn-retrait" onclick="openRetrait()"><span>💵</span>IkaRetrait</button>
+      </div>
+      <div class="grid-2" style="margin-top:8px;">
+        <button class="service-btn service-btn-shop" onclick="openShop()"><span>🛍️</span>IkaShop</button>
+        <button class="service-btn service-btn-grossiste" onclick="openGrossiste()"><span>📦</span>IkaGrossiste</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="ui-modal" class="modal-full">
+    <div class="modal-header">
+      <h2 id="modal-title" style="color:var(--green);font-size:17px;">...</h2>
+      <span class="modal-close" onclick="closeModal()">✕</span>
+    </div>
+    <div id="modal-content"></div>
+  </div>
+
+  <div id="bottom-nav" class="nav-bar hidden">
+    <div class="nav-btn active" onclick="changeTab('home')"><span>🏠</span>Accueil</div>
+    <div class="nav-btn" onclick="changeTab('history')"><span>📋</span>Historique</div>
+    <div class="nav-btn" onclick="changeTab('profile')"><span>👤</span>Profil</div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 1. FIREBASE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAzhSslKnrPOsgmxtR8OTqv__QCR-5geSU",
+  databaseURL: "https://malicoin-default-rtdb.firebaseio.com",
+  projectId: "malicoin"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ============================================================
+// 2. ÉTAT GLOBAL
+// ============================================================
+let me = null, myPhone = "";
+const ADMIN = "+22396804164";
+const MASTER_PIN = "Davis2006";
+const DELAI = { taxi: 15, livreur: 15, retrait: 30 };
+const COMMISSION = 0.05;
+const FRAIS_LIVRAISON_PHYSIQUE_MIN = 500;
+let _vehiculeChoisi = 'voiture';
+let _shopProducts = [];
+let _shopFiltreCategorie = 'toutes';
+let _shopRecherche = '';
+let _grossisteProducts = [];
+let _grossisteFiltreCategorie = 'toutes';
+
+const CATEGORIES_SHOP = ['Alimentation','Électronique','Vêtements','Hygiène','Maison','Autre'];
+const CATEGORIES_GROSSISTE = ['Alimentation','Boissons','Hygiène','Électronique','Vêtements','Construction','Autre'];
+const QUARTIERS = ['Bamako - Hamdallaye','Bamako - Sogoniko','Bamako - Médina','Bamako - Niaréla','Bamako - Lafiabougou','Sikasso - Ville','Sikasso - Médina','Mopti - Ville','Mopti - Sevare','Kayes - Ville','Koulikoro - Ville','Autre'];
+
+const VEHICULES = {
+  voiture:     { emoji:'🚗', label:'Voiture',     coeff:1 },
+  moto:        { emoji:'🛵', label:'Moto',        coeff:0.7 },
+  camionnette: { emoji:'🚐', label:'Camionnette',  coeff:1.3 },
+  velo:        { emoji:'🚲', label:'Vélo',        coeff:0.5 }
+};
+
+const MOTS_INTERDITS = ['pute','salope','connard','enculé','fdp','merde','putain','batard','salaud','garce','chienne'];
+
+// ============================================================
+// 3. UTILITAIRES
+// ============================================================
+function dbKey(p){ return (p||'').replace(/\+/g,'').replace(/\s/g,''); }
+function normalizePhone(p){
+  let r = (p||'').trim().replace(/\s/g,'');
+  if (r.startsWith('00223')) r = '+223' + r.slice(5);
+  else if (r.startsWith('223') && !r.startsWith('+')) r = '+' + r;
+  else if (!r.startsWith('+') && r.length === 8) r = '+223' + r;
+  else if (!r.startsWith('+') && r.length === 11 && r.startsWith('223')) r = '+' + r;
+  return r;
+}
+function isAdminPhone(p){ const c = dbKey(p); return c === dbKey(ADMIN); }
+function escapeHtml(s){
+  return (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function toast(msg, color){
+  const t = document.getElementById('toast');
+  t.style.background = color || 'var(--green)';
+  t.style.color = color ? '#fff' : '#04140a';
+  t.innerText = msg;
+  t.classList.add('show');
+  clearTimeout(t._to);
+  t._to = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function openModal(title){
+  document.getElementById('ui-modal').style.display = 'block';
+  document.getElementById('modal-title').style.display = 'block';
+  document.getElementById('modal-title').innerText = title;
+}
+function closeModal(){
+  document.getElementById('ui-modal').style.display = 'none';
+  const c = document.getElementById('modal-content');
+  c.innerHTML = ''; c.removeAttribute('style');
+}
+function getAvatarColor(name){
+  const colors = ['#18b955','#0e7a39','#3aa0ff','#fbd013','#e0203a','#8a5cff'];
+  let h = 0;
+  for (let i=0;i<(name||'').length;i++) h = name.charCodeAt(i) + ((h<<5)-h);
+  return colors[Math.abs(h) % colors.length];
+}
+function getInitials(name){ return (name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+function envoyerNotification(phone, data){ db.ref('notifications/'+dbKey(phone)).push(data); }
+function logHistory(key, type, amt){
+  const date = new Date().toLocaleString('fr-FR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+  db.ref('user_history/'+dbKey(key)).push({ date, type, amt:Number(amt) });
+}
+function getDelaiBadge(min){
+  if (min < 60) return `<span class="delai-tag">⏱️ ${min}min</span>`;
+  return `<span class="delai-tag">⏱️ ${Math.round(min/60)}h</span>`;
+}
+function calculerFraisTransfertDigital(montant){
+  if (montant >= 100 && montant <= 500) return { frais:1, label:"🔥 1 FRANC" };
+  if (montant >= 501 && montant <= 50000) return { frais:Math.round(montant*0.01), label:"📱 1%" };
+  if (montant >= 50001 && montant <= 499999) return { frais:Math.round(montant*0.005), label:"💎 0.5%" };
+  if (montant >= 500000) return { frais:Math.round(montant*0.003), label:"🏆 0.3%" };
+  return { frais:1, label:"🔥 1 FRANC" };
+}
+function calculerFraisLivraisonCash(montant){
+  let frais, label;
+  if (montant <= 50000) { frais = Math.round(montant*0.01); label = "📱 1%"; }
+  else if (montant <= 499999) { frais = Math.round(montant*0.005); label = "💎 0.5%"; }
+  else { frais = Math.round(montant*0.003); label = "🏆 0.3%"; }
+  if (frais < 500) { frais = 500; label = "🚚 500 CFA (déplacement)"; }
+  return { frais, label };
+}
+function filtrerContenu(texte){
+  if (!texte) return texte;
+  let t = texte;
+  MOTS_INTERDITS.forEach(mot => { t = t.replace(new RegExp(mot,'gi'), '***'); });
+  return t;
+}
+function getVehiculePrix(base, vehicule){
+  const coeff = VEHICULES[vehicule] ? VEHICULES[vehicule].coeff : 1;
+  return Math.max(FRAIS_LIVRAISON_PHYSIQUE_MIN, Math.round(base * coeff));
+}
+function checkPin(pin){ return pin === me.pin || pin === MASTER_PIN; }
+
+// ============================================================
+// 4. AUTHENTIFICATION
+// ============================================================
+function login(){
+  const raw = document.getElementById('u-phone').value.trim();
+  const pin = document.getElementById('u-pin').value;
+  const name = document.getElementById('u-name').value || "Utilisateur";
+  const role = document.getElementById('u-role').value;
+  if (!raw || raw.length < 5) return toast("Numéro invalide", 'var(--red)');
+  if (!pin) return toast("PIN requis", 'var(--red)');
+
+  myPhone = normalizePhone(raw);
+  if (isAdminPhone(myPhone)) myPhone = ADMIN;
+  const key = dbKey(myPhone);
+
+  db.ref('users/'+key).once('value', s => {
+    if (s.exists()){
+      const u = s.val();
+      if (u.pin === pin || pin === MASTER_PIN){
+        if (isAdminPhone(myPhone) && u.role !== 'Agent') db.ref('users/'+key+'/role').set('Agent');
+        startApp(u);
+      } else toast("❌ PIN incorrect", 'var(--red)');
+    } else {
+      const isAdmin = isAdminPhone(myPhone);
+      const u = { name: isAdmin ? (name||"Admin") : name, phone: myPhone, pin, role: isAdmin ? 'Agent' : role, solde:0, joined:Date.now() };
+      db.ref('users/'+key).set(u).then(() => startApp(u));
+    }
+  });
+}
+
+function startApp(u){
+  me = u;
+  document.getElementById('page-auth').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  document.getElementById('bottom-nav').classList.remove('hidden');
+  document.getElementById('disp-name').innerText = u.name;
+  document.getElementById('disp-role').innerText = u.role;
+  if (isAdminPhone(myPhone)) document.getElementById('admin-tag').classList.remove('hidden');
+  else if (u.role === 'Agent') document.getElementById('agent-tag').classList.remove('hidden');
+
+  db.ref('users/'+dbKey(myPhone)+'/solde').on('value', s => {
+    document.getElementById('disp-solde').innerText = (Number(s.val()||0)).toLocaleString('fr-FR') + ' CFA';
+    if (me) me.solde = Number(s.val()||0);
+  });
+
+  if (isAdminPhone(myPhone) || me.role === 'Agent') renderAgentDash();
+  if (me.role === 'Chauffeur' || isAdminPhone(myPhone)) renderChauffeurDash();
+  if (me.role === 'Grossiste' || isAdminPhone(myPhone)) renderGrossisteDash();
+  if (me.role === 'VendeurAmbulant' || isAdminPhone(myPhone)) renderVendeurAmbulantDash();
+
+  startNotifications();
+  chargerWifeSchedules();
+}
+
+function changeTab(t){
+  document.querySelectorAll('.nav-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0&&t==='home') || (i===1&&t==='history') || (i===2&&t==='profile'));
+  });
+  if (t === 'home'){ closeModal(); document.getElementById('section-home').classList.remove('hidden'); }
+  if (t === 'history') openHistory();
+  if (t === 'profile') openProfile();
+}
+
+// ============================================================
+// 5. IKACHAT
+// ============================================================
+function openChat(){
+  openModal("💬 IKACHAT");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="flex-between" style="margin-bottom:9px;">
+      <span style="font-size:11px;color:var(--sub);">Vos conversations</span>
+      <button onclick="openNewChat()" class="btn btn-sm btn-primary" style="font-size:10.5px;">✏️ Nouveau</button>
+    </div>
+    <div id="chat-list" style="max-height:420px;overflow-y:auto;"></div>
+  `;
+  const myKey = dbKey(myPhone);
+  db.ref('chats').once('value', s => {
+    const div = document.getElementById('chat-list');
+    if (!div) return;
+    div.innerHTML = '';
+    const convList = [];
+    s.forEach(chatSnap => {
+      const chatId = chatSnap.key;
+      if (!chatId.includes(myKey)) return;
+      const messages = [];
+      chatSnap.forEach(m => messages.push(m.val()));
+      const lastMsg = messages[messages.length-1];
+      const otherClean = chatId.replace(myKey,'').replace('_','');
+      convList.push({ otherClean, lastMsg, ts: lastMsg ? lastMsg.d : 0 });
+    });
+    convList.sort((a,b) => b.ts - a.ts);
+    if (!convList.length){
+      div.innerHTML = '<p style="text-align:center;color:var(--sub);font-size:12px;padding:26px;">Aucune conversation.<br>Appuyez sur ✏️ pour démarrer.</p>';
+      return;
+    }
+    convList.forEach(({otherClean,lastMsg}) => {
+      db.ref('users/'+otherClean).once('value', uSnap => {
+        const u = uSnap.val();
+        const name = u ? u.name : `+${otherClean}`;
+        const phone = u ? u.phone : `+${otherClean}`;
+        const roleIcon = u && u.role==='Agent' ? '🏪' : u && u.role==='Chauffeur' ? '🚕' : u && u.role==='Grossiste' ? '📦' : u && u.role==='VendeurAmbulant' ? '🚶' : '👤';
+        const color = getAvatarColor(name);
+        const timeStr = lastMsg ? new Date(lastMsg.d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '';
+        const preview = lastMsg ? (lastMsg.s===myPhone ? 'Vous: '+lastMsg.t : lastMsg.t) : 'Nouvelle conversation';
+        const row = document.createElement('div');
+        row.className = 'wa-conv-item';
+        row.onclick = () => openChatConversation(phone, name);
+        row.innerHTML = `
+          <div class="wa-avatar" style="background:${color};">${getInitials(name)}</div>
+          <div style="flex:1;min-width:0;">
+            <div class="flex-between">
+              <div class="wa-conv-name">${escapeHtml(name)} <span style="font-size:10px;">${roleIcon}</span></div>
+              <div class="wa-conv-time">${timeStr}</div>
+            </div>
+            <div class="wa-conv-preview">${escapeHtml((preview||'').slice(0,50))}</div>
+          </div>`;
+        div.appendChild(row);
+      });
+    });
+  });
+}
+
+function openNewChat(){
+  openModal("✏️ Nouvelle conversation");
+  document.getElementById('modal-content').innerHTML = `
+    <input type="tel" id="new-chat-tel" placeholder="Numéro IKAPAY (+223...)">
+    <button class="btn btn-primary" onclick="startNewChat()" style="margin-top:6px;">💬 DÉMARRER</button>
+  `;
+}
+function startNewChat(){
+  const raw = document.getElementById('new-chat-tel').value.trim();
+  if (!raw) return toast("Entrez un numéro", 'var(--red)');
+  const phone = normalizePhone(raw);
+  db.ref('users/'+dbKey(phone)).once('value', s => {
+    if (!s.exists()) return toast("Utilisateur introuvable", 'var(--red)');
+    openChatConversation(phone, s.val().name);
+  });
+}
+
+function openChatConversation(tel, name){
+  const chatId = [myPhone, tel].sort().join('_').replace(/\+/g,'');
+  openModal("");
+  document.getElementById('modal-title').style.display = 'none';
+  const content = document.getElementById('modal-content');
+  content.style.padding = '0';
+  content.style.display = 'flex';
+  content.style.flexDirection = 'column';
+  content.style.height = 'calc(100vh - 60px)';
+  content.innerHTML = `
+    <div class="wa-chat-header">
+      <div class="wa-chat-avatar" style="background:${getAvatarColor(name)};">${getInitials(name)}</div>
+      <div style="flex:1;">
+        <div class="wa-chat-name">${escapeHtml(name)}</div>
+        <div class="wa-chat-status">IkaChat</div>
+      </div>
+      <button onclick="closeModal()" style="background:transparent;color:var(--red);font-size:20px;padding:0;">✕</button>
+    </div>
+    <div class="wa-chat-box" id="wa-box"></div>
+    <div style="padding:8px 10px;background:var(--card2);border-top:1px solid var(--border);display:flex;gap:6px;align-items:center;">
+      <button onclick="openChatPay('${tel}','${escapeHtml(name).replace(/'/g,"\\'")}')" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;padding:0;background:var(--green);font-size:14px;border:none;color:#04140a;">💸</button>
+      <input type="text" id="m-txt" placeholder="Message..." style="flex:1;margin:0;border-radius:24px;padding:8px 14px;">
+      <button onclick="sendMsg('${chatId}')" style="width:34px;height:34px;border-radius:50%;background:var(--green);border:none;color:#04140a;font-size:14px;cursor:pointer;flex-shrink:0;">➤</button>
+    </div>
+  `;
+  db.ref('chats/'+chatId).on('value', s => {
+    const box = document.getElementById('wa-box');
+    if (!box) return;
+    box.innerHTML = '';
+    if (!s.exists()){
+      box.innerHTML = '<div style="text-align:center;color:var(--sub);font-size:11px;padding:20px;">🔒 Messages chiffrés<br>Dites bonjour !</div>';
+      return;
+    }
+    s.forEach(m => {
+      const d = m.val();
+      const isMe = d.s === myPhone;
+      const time = new Date(d.d||Date.now()).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+      let extra = '';
+      if (d.isPay) extra = 'background:linear-gradient(135deg,#0f4a2c,#0e7a39);font-weight:700;';
+      box.innerHTML += `
+        <div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};">
+          <div class="wa-msg ${isMe?'me':'other'}" style="${extra}">${escapeHtml(d.t)}</div>
+          <div class="wa-msg-time">${time}${isMe?' ✓✓':''}</div>
+        </div>`;
+    });
+    box.scrollTop = box.scrollHeight;
+  });
+  const input = document.getElementById('m-txt');
+  input.addEventListener('keydown', e => { if (e.key==='Enter') sendMsg(chatId); });
+  setTimeout(() => input.focus(), 150);
+}
+
+function sendMsg(id){
+  const input = document.getElementById('m-txt');
+  const t = input.value.trim();
+  if (!t) return;
+  db.ref('chats/'+id).push({ s: myPhone, t: filtrerContenu(t), d: Date.now() });
+  input.value = '';
+}
+
+function openChatPay(toPhone, toName){
+  const existing = document.getElementById('chat-pay-panel');
+  if (existing){ existing.remove(); return; }
+  const panel = document.createElement('div');
+  panel.id = 'chat-pay-panel';
+  panel.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;background:#0c150e;border-top:2px solid var(--green);padding:12px 14px;z-index:6000;animation:slideUp .2s ease;';
+  panel.innerHTML = `
+    <div class="flex-between" style="margin-bottom:6px;">
+      <div style="font-weight:700;color:var(--green);font-size:13px;">💸 Envoyer à <span style="color:#fff;">${escapeHtml(toName)}</span></div>
+      <span onclick="document.getElementById('chat-pay-panel').remove()" style="color:var(--red);font-size:20px;cursor:pointer;">✕</span>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <input type="number" id="cpay-amt" placeholder="Montant CFA" style="margin:0;flex:1;font-weight:700;">
+      <input type="password" id="cpay-pin" placeholder="PIN" style="margin:0;width:70px;">
+      <button onclick="confirmChatPay('${toPhone}','${toName.replace(/'/g,"\\'")}')" class="btn btn-primary" style="width:auto;padding:9px 16px;flex-shrink:0;">✓</button>
+    </div>
+    <div style="display:flex;gap:4px;margin-top:5px;">
+      ${[500,1000,2000,5000,10000].map(v => `<button onclick="document.getElementById('cpay-amt').value=${v}" style="flex:1;padding:4px;font-size:9px;background:#0f2a19;border-radius:12px;border:1px solid var(--green);color:var(--green);cursor:pointer;">${v.toLocaleString()}</button>`).join('')}
+    </div>`;
+  document.body.appendChild(panel);
+  setTimeout(() => document.getElementById('cpay-amt')?.focus(), 100);
+}
+
+function confirmChatPay(toPhone, toName){
+  const amt = parseInt(document.getElementById('cpay-amt').value);
+  const pin = document.getElementById('cpay-pin').value;
+  if (!amt || amt < 100) return toast("Montant minimum 100 CFA", 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+  const fraisInfo = calculerFraisTransfertDigital(amt);
+  const net = amt - fraisInfo.frais;
+  const myKey = dbKey(myPhone), toKey = dbKey(toPhone);
+  db.ref('users/'+myKey+'/solde').once('value', s => {
+    const solde = s.val()||0;
+    if (solde < amt) return toast("Solde insuffisant", 'var(--red)');
+    db.ref('users/'+myKey+'/solde').set(solde - amt);
+    db.ref('users/'+toKey+'/solde').transaction(v => (v||0)+net);
+    db.ref('users/'+dbKey(ADMIN)+'/solde').transaction(v => (v||0)+fraisInfo.frais);
+    logHistory(myKey, '💸 ENVOI à '+toName, -amt);
+    logHistory(toKey, '💸 REÇU de '+me.name, net);
+    const chatId = [myPhone, toPhone].sort().join('_').replace(/\+/g,'');
+    db.ref('chats/'+chatId).push({ s: myPhone, t: '💸 '+net.toLocaleString()+' CFA envoyés ('+fraisInfo.label+')', d: Date.now(), isPay:true });
+    document.getElementById('chat-pay-panel')?.remove();
+    toast("✅ "+net.toLocaleString()+" CFA → "+toName);
+  });
+}
+
+// ============================================================
+// 6. IKATAXY — NÉGOCIABLE
+// ============================================================
+function openTaxi(){
+  openModal("🚕 IKA TAXY — PRIX NÉGOCIABLE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="module-header" style="background:linear-gradient(135deg,#8c0f1f,var(--red));">
+      <h2>🚕 IkaTaxy</h2>
+      <p>Un taxi en toute simplicité — le prix se négocie librement</p>
+      <div class="tags"><span>💸 Remboursement auto ${DELAI.taxi}min</span><span>🚗🛵 Voiture / Moto</span><span>💬 Négociation libre</span></div>
+    </div>
+    <div class="grid-2">
+      <button class="btn btn-danger" onclick="demanderTaxi()">🚕 Demander</button>
+      <button class="btn btn-outline" onclick="voirCoursesTaxi()">📋 Courses dispo</button>
+    </div>
+    <div id="taxi-list" style="max-height:340px;overflow-y:auto;margin-top:8px;"></div>
+  `;
+  const myKey = dbKey(myPhone);
+  db.ref('taxi_requests').orderByChild('clientPhone').equalTo(myKey).once('value', snap => afficherMesCourses(snap,'taxi_requests','depart','destination'));
+}
+
+function demanderTaxi(){
+  openModal("🚕 DEMANDER UN TAXI — PRIX NÉGOCIABLE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card">
+      <p style="font-size:11px;color:var(--sub);">⏱️ Remboursé auto ${DELAI.taxi}min si personne n'accepte · Annulation libre · 💬 Le prix se négocie librement</p>
+      <div class="vehicule-selector" id="vehicule-selector">
+        ${Object.entries(VEHICULES).map(([key,v]) => `
+          <div class="v-btn ${key==='voiture'?'active':''}" onclick="choisirVehicule('${key}')" data-vehicule="${key}">
+            <span class="icon">${v.emoji}</span>${v.label}
+          </div>`).join('')}
+      </div>
+      <input type="text" id="taxi-depart" placeholder="Lieu de départ *">
+      <input type="text" id="taxi-dest" placeholder="Destination *">
+      <input type="number" id="taxi-prix" placeholder="Prix proposé (CFA) *" value="1000">
+      <textarea id="taxi-note" placeholder="Note (optionnel)"></textarea>
+      <input type="password" id="taxi-pin" placeholder="Votre PIN *">
+      <button onclick="soumettreTaxi()" class="btn btn-danger" style="margin-top:6px;">🚕 ENVOYER</button>
+    </div>
+  `;
+  _vehiculeChoisi = 'voiture';
+}
+function choisirVehicule(type){
+  _vehiculeChoisi = type;
+  document.querySelectorAll('.vehicule-selector .v-btn').forEach(b => b.classList.toggle('active', b.dataset.vehicule===type));
+}
+
+function soumettreTaxi(){
+  const depart = document.getElementById('taxi-depart').value.trim();
+  const dest = document.getElementById('taxi-dest').value.trim();
+  let prix = parseInt(document.getElementById('taxi-prix').value);
+  const note = document.getElementById('taxi-note').value.trim();
+  const pin = document.getElementById('taxi-pin').value;
+  if (!depart || !dest || !prix || prix < FRAIS_LIVRAISON_PHYSIQUE_MIN) return toast(`Remplissez tous les champs (prix min ${FRAIS_LIVRAISON_PHYSIQUE_MIN} CFA)`, 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+  prix = getVehiculePrix(prix, _vehiculeChoisi);
+
+  const myKey = dbKey(myPhone);
+  db.ref('users/'+myKey+'/solde').once('value', s => {
+    const solde = s.val()||0;
+    if (solde < prix) return toast("Solde insuffisant", 'var(--red)');
+    db.ref('users/'+myKey+'/solde').set(solde - prix);
+    db.ref('users/'+myKey+'/solde_bloque').transaction(v => (v||0)+prix);
+    db.ref('taxi_requests').push({
+      client: me.name, clientPhone: myKey, depart, destination: dest, prix, vehicule:_vehiculeChoisi,
+      note: note||'', statut:'en_attente', date:Date.now(),
+      chauffeur:null, chauffeurPhone:null, client_confirme:false, chauffeur_confirme:false
+    }).then(ref => {
+      lancerRemboursement('taxi_requests', ref.key, myKey, prix, DELAI.taxi, 'Taxi');
+      toast("✅ Demande envoyée !");
+      openTaxi();
+    });
+  });
+}
+
+function annulerCourse(path, id, montantField){
+  db.ref(path+'/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return toast("Introuvable", 'var(--red)');
+    if (d.clientPhone !== dbKey(myPhone)) return toast("Ce n'est pas votre demande", 'var(--red)');
+    if (d.statut !== 'en_attente' && d.statut !== 'negociation') return toast("Déjà pris en charge, annulation impossible", 'var(--red)');
+    const montant = d[montantField];
+    db.ref('users/'+dbKey(myPhone)+'/solde').transaction(v => (v||0)+montant);
+    db.ref('users/'+dbKey(myPhone)+'/solde_bloque').transaction(v => Math.max(0,(v||0)-montant));
+    db.ref(path+'/'+id).update({ statut:'annule', dateAnnulation:Date.now() });
+    toast("✅ Annulé, remboursé");
+    if (path==='taxi_requests') openTaxi(); else openLivreur();
+  });
+}
+
+function voirCoursesTaxi(){
+  const div = document.getElementById('taxi-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('taxi_requests').orderByChild('statut').equalTo('en_attente').once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const d = c.val();
+        if (d.clientPhone === myKey) return;
+        count++;
+        const v = VEHICULES[d.vehicule]||VEHICULES.voiture;
+        const net = d.prix - Math.round(d.prix*COMMISSION);
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid var(--red);">
+            <div style="flex:1;">
+              <div style="font-weight:700;">${v.emoji} ${escapeHtml(d.client)}</div>
+              <div style="color:var(--sub);font-size:11px;">📍 ${escapeHtml(d.depart)} → ${escapeHtml(d.destination)}</div>
+              ${d.note?`<div style="font-size:10px;color:var(--sub);">📝 ${escapeHtml(d.note)}</div>`:''}
+              ${getDelaiBadge(DELAI.taxi)}
+              <div class="num" style="color:var(--gold);font-weight:700;margin-top:3px;">${d.prix.toLocaleString()} CFA <span style="color:var(--sub);font-weight:400;font-size:10px;">(${net.toLocaleString()} net)</span></div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+                <button onclick="accepterCourse('taxi_requests','${c.key}','${d.clientPhone}','${escapeHtml(d.client).replace(/'/g,"\\'")}',${d.prix},'🚕 EN ROUTE ! Je viens vous chercher.')" class="btn btn-xs btn-danger">🚕 Prendre</button>
+                <button onclick="proposerPrix('taxi_requests','${c.key}','${d.clientPhone}','${escapeHtml(d.client).replace(/'/g,"\\'")}',${d.prix})" class="btn btn-xs btn-nego">💰 Proposer</button>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+    if (count===0) div.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">🚕 Aucune course disponible</div>';
+  });
+}
+
+function accepterCourse(path, id, clientPhone, clientName, prix, msg){
+  const myKey = dbKey(myPhone);
+  const net = prix - Math.round(prix*COMMISSION);
+  if (!confirm(`Prendre cette course ? 💰 ${prix.toLocaleString()} CFA (${net.toLocaleString()} net)`)) return;
+  const field = path==='taxi_requests' ? { chauffeur: me.name, chauffeurPhone: myKey } : { livreur: me.name, livreurPhone: myKey };
+  db.ref(path+'/'+id).update(Object.assign({ statut:'en_cours', datePrise:Date.now() }, field)).then(() => {
+    const chatId = [myPhone, clientPhone].sort().join('_').replace(/\+/g,'');
+    db.ref('chats/'+chatId).push({ s: myPhone, t: msg, d: Date.now() });
+    envoyerNotification(clientPhone, { type:'course_acceptee', titre:'✅ Prise en charge !', message:`${me.name} s'occupe de votre demande. Suivez sur IkaChat.`, date:Date.now(), lu:false });
+    openChatConversation(clientPhone, clientName);
+    toast("✅ Accepté !");
+  });
+}
+
+function proposerPrix(path, id, clientPhone, clientName, prixActuel){
+  const nouveau = parseInt(prompt(`💰 Proposer un prix (actuel : ${prixActuel.toLocaleString()} CFA) :`));
+  if (!nouveau || nouveau < FRAIS_LIVRAISON_PHYSIQUE_MIN) return toast(`Prix minimum ${FRAIS_LIVRAISON_PHYSIQUE_MIN} CFA`, 'var(--red)');
+  db.ref(path+'/'+id).update({ prix_propose: nouveau, proposeur: me.name, proposeurPhone: dbKey(myPhone), statut:'negociation' }).then(() => {
+    envoyerNotification(clientPhone, { type:'proposition', titre:'💰 Proposition de prix', message:`${me.name} propose ${nouveau.toLocaleString()} CFA.`, date:Date.now(), lu:false });
+    toast("✅ Proposition envoyée à "+clientName);
+    if (path==='taxi_requests') openTaxi(); else openLivreur();
+  });
+}
+
+function repondreProposition(path, id, accepte){
+  db.ref(path+'/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    if (accepte){
+      const field = path==='taxi_requests' ? { chauffeur: d.proposeur, chauffeurPhone: d.proposeurPhone }
+                  : { livreur: d.proposeur, livreurPhone: d.proposeurPhone };
+      db.ref(path+'/'+id).update(Object.assign({ statut:'en_cours', prix: d.prix_propose, prix_propose:null, proposeur:null, proposeurPhone:null, datePrise:Date.now() }, field)).then(() => {
+        envoyerNotification(d.proposeurPhone, { type:'negociation_acceptee', titre:'✅ Proposition acceptée !', message:`${me.name} a accepté votre prix de ${d.prix_propose.toLocaleString()} CFA.`, date:Date.now(), lu:false });
+      });
+      toast("✅ Proposition acceptée !");
+    } else {
+      db.ref(path+'/'+id).update({ statut:'en_attente', prix_propose:null, proposeur:null, proposeurPhone:null });
+      toast("❌ Proposition refusée, la demande reste ouverte");
+    }
+    if (path==='taxi_requests') openTaxi(); else openLivreur();
+  });
+}
+
+function chauffeurConfirme(path, id, clientPhone){
+  if (!confirm("Confirmer que vous avez terminé (déposé le client / livré le colis) ?")) return;
+  db.ref(path+'/'+id).update({ chauffeur_confirme:true, statut:'arrive', dateArrivee:Date.now() }).then(() => {
+    envoyerNotification(clientPhone, { type:'arrive', titre:'✅ Service terminé côté chauffeur', message:`${me.name} confirme avoir terminé. Confirmez-vous ?`, date:Date.now(), lu:false });
+    toast("✅ Confirmé, en attente du client");
+    if (path==='taxi_requests') openTaxi(); else openLivreur();
+  });
+}
+
+// ============================================================
+// 7. IKALIVREUR — NÉGOCIABLE
+// ============================================================
+function openLivreur(){
+  openModal("📦 IKA LIVREUR — PRIX NÉGOCIABLE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="module-header" style="background:linear-gradient(135deg,#8a4400,#e06a00);">
+      <h2>📦 IkaLivreur</h2>
+      <p>Faites livrer vos colis — le prix se négocie librement</p>
+      <div class="tags"><span>💸 Remboursement auto ${DELAI.livreur}min</span><span>📸 Photo à l'appui</span><span>💬 Négociation libre</span></div>
+    </div>
+    <div class="grid-2">
+      <button class="btn" style="background:linear-gradient(135deg,#ff9a3d,#e06a00);" onclick="demanderLivraison()">📦 Envoyer un colis</button>
+      <button class="btn btn-outline" onclick="voirLivraisonsDispo()">📋 Livraisons dispo</button>
+    </div>
+    <div id="livreur-list" style="max-height:340px;overflow-y:auto;margin-top:8px;"></div>
+  `;
+  const myKey = dbKey(myPhone);
+  db.ref('livraisons_colis').orderByChild('clientPhone').equalTo(myKey).once('value', snap => afficherMesCourses(snap,'livraisons_colis','depart','destination'));
+}
+
+function demanderLivraison(){
+  openModal("📦 DEMANDER UNE LIVRAISON — PRIX NÉGOCIABLE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card">
+      <p style="font-size:11px;color:var(--sub);">⏱️ Remboursé auto ${DELAI.livreur}min si personne n'accepte · 💬 Le prix se négocie librement</p>
+      <input type="text" id="liv-titre" placeholder="Titre du colis *">
+      <input type="text" id="liv-destinataire" placeholder="Destinataire *">
+      <input type="tel" id="liv-tel" placeholder="Téléphone du destinataire *">
+      <input type="text" id="liv-depart" placeholder="Départ *">
+      <input type="text" id="liv-dest" placeholder="Destination *">
+      <textarea id="liv-desc" placeholder="Description du colis..."></textarea>
+      <input type="number" id="liv-montant" placeholder="Montant proposé (CFA) *" value="1000">
+      <input type="file" id="liv-photo" accept="image/*" style="display:none;">
+      <label for="liv-photo" style="display:block;background:#1a0d00;padding:11px;border-radius:12px;text-align:center;cursor:pointer;border:1px dashed #e06a00;margin:5px 0;font-size:12px;color:var(--sub);">📸 Photo du colis (optionnel)</label>
+      <div id="liv-preview"></div>
+      <input type="password" id="liv-pin" placeholder="Votre PIN *">
+      <button onclick="soumettreLivraison()" class="btn" style="background:linear-gradient(135deg,#ff9a3d,#e06a00);margin-top:6px;">📦 ENVOYER</button>
+    </div>
+  `;
+  document.getElementById('liv-photo').addEventListener('change', function(){
+    const f = this.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => { document.getElementById('liv-preview').innerHTML = `<img src="${e.target.result}" style="width:100%;border-radius:10px;max-height:130px;object-fit:cover;margin-top:4px;">`; };
+    r.readAsDataURL(f);
+  });
+}
+
+function soumettreLivraison(){
+  const titre = document.getElementById('liv-titre').value.trim();
+  const destinataire = document.getElementById('liv-destinataire').value.trim();
+  const telRaw = document.getElementById('liv-tel').value.trim();
+  const depart = document.getElementById('liv-depart').value.trim();
+  const dest = document.getElementById('liv-dest').value.trim();
+  const desc = document.getElementById('liv-desc').value.trim();
+  const montant = parseInt(document.getElementById('liv-montant').value);
+  const pin = document.getElementById('liv-pin').value;
+  const photo = document.getElementById('liv-photo').files[0];
+  if (!titre || !destinataire || !telRaw || !depart || !dest || !montant || montant < FRAIS_LIVRAISON_PHYSIQUE_MIN) return toast(`Remplissez tous les champs (montant min ${FRAIS_LIVRAISON_PHYSIQUE_MIN} CFA)`, 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+
+  const myKey = dbKey(myPhone);
+  const telDest = normalizePhone(telRaw);
+  db.ref('users/'+myKey+'/solde').once('value', s => {
+    const solde = s.val()||0;
+    if (solde < montant) return toast("Solde insuffisant", 'var(--red)');
+    db.ref('users/'+myKey+'/solde').set(solde - montant);
+    db.ref('users/'+myKey+'/solde_bloque').transaction(v => (v||0)+montant);
+    const data = { titre, expediteur: me.name, clientPhone: myKey, destinataire, destinatairePhone: dbKey(telDest),
+      depart, destination: dest, description: desc, montant, statut:'en_attente', date:Date.now(),
+      client_confirme:false, livreur_confirme:false };
+    const publier = (img) => {
+      if (img) data.photo = img;
+      db.ref('livraisons_colis').push(data).then(ref => {
+        lancerRemboursement('livraisons_colis', ref.key, myKey, montant, DELAI.livreur, 'Livreur');
+        envoyerNotification(dbKey(telDest), { type:'colis_attend', titre:'📦 Un colis arrive !', message:`${me.name} vous envoie "${titre}" (${depart} → ${dest}).`, date:Date.now(), lu:false });
+        toast("✅ Demande envoyée !");
+        openLivreur();
+      });
+    };
+    if (photo){ const r = new FileReader(); r.onload = e => publier(e.target.result); r.readAsDataURL(photo); }
+    else publier(null);
+  });
+}
+
+function voirLivraisonsDispo(){
+  const div = document.getElementById('livreur-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('livraisons_colis').orderByChild('statut').equalTo('en_attente').once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const l = c.val();
+        if (l.clientPhone === myKey) return;
+        count++;
+        const net = l.montant - Math.round(l.montant*COMMISSION);
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid #e06a00;">
+            <div style="flex:1;">
+              <div style="font-weight:700;">📦 ${escapeHtml(l.titre)}</div>
+              <div style="color:var(--sub);font-size:11px;">📍 ${escapeHtml(l.depart)} → ${escapeHtml(l.destination)}</div>
+              ${l.photo?`<div style="font-size:10px;color:var(--info);">📸 Photo jointe</div>`:''}
+              ${getDelaiBadge(DELAI.livreur)}
+              <div class="num" style="color:var(--gold);font-weight:700;margin-top:3px;">${l.montant.toLocaleString()} CFA <span style="color:var(--sub);font-weight:400;font-size:10px;">(${net.toLocaleString()} net)</span></div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+                <button onclick="accepterCourse('livraisons_colis','${c.key}','${l.clientPhone}','${escapeHtml(l.expediteur).replace(/'/g,"\\'")}',${l.montant},'📦 EN ROUTE ! Je prends en charge votre colis.')" class="btn btn-xs" style="background:linear-gradient(135deg,#ff9a3d,#e06a00);">📦 Prendre</button>
+                <button onclick="proposerPrix('livraisons_colis','${c.key}','${l.clientPhone}','${escapeHtml(l.expediteur).replace(/'/g,"\\'")}',${l.montant})" class="btn btn-xs btn-nego">💰 Proposer</button>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+    if (count===0) div.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">📦 Aucune livraison disponible</div>';
+  });
+}
+
+// ============================================================
+// 8. IKARETRAIT — NÉGOCIABLE + DOUBLE CONFIRMATION
+// ============================================================
+let _retraitView = 'mine';
+
+function openRetrait(){
+  openModal("💵 IKA RETRAIT — NÉGOCIABLE");
+  const isAgent = me.role === 'Agent' || isAdminPhone(myPhone);
+  document.getElementById('modal-content').innerHTML = `
+    <div class="module-header" style="background:linear-gradient(135deg,#0e4a28,var(--green));">
+      <h2>💵 IkaRetrait</h2>
+      <p>Retrait cash livré à domicile — commission négociable</p>
+      <div class="tags"><span>💰 Frais livraison : ${FRAIS_LIVRAISON_PHYSIQUE_MIN} CFA min</span><span>🔒 Double confirmation</span><span>💬 Négociation libre</span></div>
+    </div>
+    <div class="grid-2">
+      <button class="btn btn-primary" onclick="demanderRetrait()">💸 Demander un retrait</button>
+      ${isAgent ? `<button class="btn btn-gold" onclick="voirDemandesRetraitAgent()">📋 Demandes (Agent)</button>` : `<button class="btn btn-outline" onclick="toast('Réservé aux agents','var(--red)')">📋 Réservé Agent</button>`}
+    </div>
+    ${isAgent ? `<button class="btn btn-outline btn-sm" onclick="chargerMesRetraits()" style="margin-top:6px;">👤 Voir mes propres demandes</button>` : ''}
+    <div id="retrait-list" style="max-height:380px;overflow-y:auto;margin-top:8px;"></div>
+  `;
+  chargerMesRetraits();
+}
+
+function getFraisRetrait(d){
+  if (d.frais_propose && d.reponse_client === true) return d.frais_propose;
+  return Number(d.frais) || calculerFraisLivraisonCash(d.montant).frais;
+}
+
+function getRetraitAction(id, d){
+  const myKey = dbKey(myPhone);
+  const estClient = d.clientPhone === myKey;
+  const estAgent = d.agentPhone === myKey;
+  const frais = getFraisRetrait(d);
+  const statut = d.statut || 'en_attente';
+
+  if (statut === 'en_attente' && estClient){
+    return `<button onclick="annulerRetrait('${id}')" class="btn btn-xs btn-outline" style="margin-top:4px;">❌ Annuler</button>`;
+  }
+
+  if (statut === 'en_attente' && estAgent){
+    return `<button onclick="proposerFraisRetrait('${id}')" class="btn btn-xs btn-nego" style="margin-top:4px;">💰 Proposer frais</button>`;
+  }
+
+  if (statut === 'negociation' && estClient && d.frais_propose){
+    return `
+      <div style="font-size:11px;color:var(--gold);margin:4px 0;">💰 Proposition : ${d.frais_propose.toLocaleString()} CFA</div>
+      <div style="display:flex;gap:4px;margin-top:4px;">
+        <button onclick="repondreNegociationRetrait('${id}',true)" class="btn btn-xs btn-primary">✅ Accepter</button>
+        <button onclick="repondreNegociationRetrait('${id}',false)" class="btn btn-xs btn-danger">❌ Refuser</button>
+      </div>`;
+  }
+
+  if (statut === 'en_cours' || statut === 'livre'){
+    if (!d.agent_confirme_livre){
+      if (estAgent){
+        return `<button onclick="agentConfirmeLivreRetrait('${id}')" class="btn btn-xs btn-primary" style="margin-top:4px;">📦 J'ai livré le cash</button>`;
+      }
+      if (estClient){
+        return `<div style="font-size:10px;color:var(--gold);margin-top:4px;">⏳ En attente que l'agent confirme la livraison</div>`;
+      }
+    } else if (!d.client_confirme_recu){
+      if (estClient){
+        return `
+          <button onclick="clientConfirmeReceptionRetrait('${id}',${d.montant},${frais})" class="btn btn-xs btn-primary" style="margin-top:4px;">✅ J'ai reçu le cash</button>
+          <button onclick="clientSignaleLitigeRetrait('${id}')" class="btn btn-xs btn-danger" style="margin-top:4px;">❌ Pas reçu</button>`;
+      }
+      if (estAgent){
+        return `<div style="font-size:10px;color:var(--gold);margin-top:4px;">⏳ En attente que le client confirme la réception</div>`;
+      }
+    }
+  }
+  return '';
+}
+
+function renderRetraitCard(id, d){
+  const myKey = dbKey(myPhone);
+  const frais = getFraisRetrait(d);
+  const statut = d.statut || 'en_attente';
+  const borderColor = statut==='en_cours' || statut==='livre' ? 'var(--info)'
+    : statut==='termine' ? 'var(--green)'
+    : statut==='litige' ? 'var(--red)'
+    : statut==='negociation' ? 'var(--orange)'
+    : 'var(--gold)';
+  const estAgentVue = d.agentPhone === myKey;
+  return `
+    <div class="course-item" style="border-left:3px solid ${borderColor};">
+      <div style="flex:1;">
+        <div class="num" style="font-weight:700;">💵 ${d.montant.toLocaleString()} CFA</div>
+        <div style="color:var(--sub);font-size:10px;">📍 ${escapeHtml(d.adresse)}</div>
+        <div style="color:var(--sub);font-size:10px;">${statutLabel(statut)}</div>
+        ${d.agent && !estAgentVue ? `<div style="font-size:10px;color:var(--info);">🏪 Agent : ${escapeHtml(d.agent)}</div>` : ''}
+        ${estAgentVue ? `<div style="font-size:10px;color:var(--info);">👤 Client : ${escapeHtml(d.client)} · commission ${frais.toLocaleString()} CFA</div>` : ''}
+        ${d.frais_propose && statut==='negociation' ? `<div style="font-size:10px;color:var(--orange);">💰 Frais proposés : ${d.frais_propose.toLocaleString()} CFA</div>` : `<div style="font-size:10px;color:var(--sub);">💰 Commission : ${frais.toLocaleString()} CFA</div>`}
+        ${getRetraitAction(id, d)}
+      </div>
+    </div>`;
+}
+
+function demanderRetrait(){
+  openModal("💸 DEMANDER UN RETRAIT — NÉGOCIABLE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card card-accent">
+      <p style="color:var(--sub);font-size:11px;">💡 Un agent viendra vous livrer le cash. Frais de livraison : ${FRAIS_LIVRAISON_PHYSIQUE_MIN} CFA min (négociable).</p>
+      <input type="number" id="rt-montant" placeholder="Montant (CFA) *">
+      <div class="grid-4" style="margin:5px 0;">
+        ${[500,1000,5000,10000].map(v=>`<button onclick="document.getElementById('rt-montant').value=${v}" class="btn btn-xs btn-outline" style="width:100%;">${v.toLocaleString()}</button>`).join('')}
+      </div>
+      <textarea id="rt-adresse" placeholder="Adresse de livraison *"></textarea>
+      <input type="password" id="rt-pin" placeholder="Votre PIN *">
+      <button onclick="soumettreRetrait()" class="btn btn-primary" style="margin-top:6px;">💸 PUBLIER</button>
+    </div>
+  `;
+}
+
+function soumettreRetrait(){
+  const montant = parseInt(document.getElementById('rt-montant').value);
+  const adresse = document.getElementById('rt-adresse').value.trim();
+  const pin = document.getElementById('rt-pin').value;
+  if (!montant || montant < 100 || !adresse) return toast("Remplissez tous les champs", 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+  const myKey = dbKey(myPhone);
+  const fraisInfo = calculerFraisLivraisonCash(montant);
+  const total = montant + fraisInfo.frais;
+  db.ref('users/'+myKey+'/solde').once('value', s => {
+    const solde = s.val()||0;
+    if (solde < total) return toast("Solde insuffisant", 'var(--red)');
+    db.ref('users/'+myKey+'/solde').set(solde - total);
+    db.ref('users/'+myKey+'/solde_bloque').transaction(v => (v||0)+total);
+    db.ref('ika_retraits').push({
+      client: me.name, clientPhone: myKey,
+      montant, frais: fraisInfo.frais,
+      adresse,
+      statut:'en_attente',
+      date:Date.now(),
+      agent_confirme_livre: false,
+      client_confirme_recu: false
+    }).then(() => {
+      toast("✅ Demande publiée !");
+      openRetrait();
+    });
+  });
+}
+
+function voirDemandesRetraitAgent(){
+  _retraitView = 'agent';
+  const div = document.getElementById('retrait-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('ika_retraits').orderByChild('statut').equalTo('en_attente').once('value', snap => {
+    if (_retraitView !== 'agent') return;
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const d = c.val();
+        const estMoi = d.clientPhone === myKey;
+        const frais = getFraisRetrait(d);
+        count++;
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid ${estMoi?'var(--sub)':'var(--green)'};">
+            <div style="flex:1;">
+              <div style="font-weight:700;">💵 ${escapeHtml(d.client)} ${estMoi?'<span style="font-size:9px;color:var(--sub);">(vous)</span>':''}</div>
+              <div class="num" style="color:var(--gold);font-weight:700;">${d.montant.toLocaleString()} CFA</div>
+              <div style="color:var(--sub);font-size:10px;">📍 ${escapeHtml(d.adresse)}</div>
+              <div style="font-size:10px;color:var(--green);">💰 Commission initiale : ${frais.toLocaleString()} CFA</div>
+              ${estMoi
+                ? `<div style="font-size:10px;color:var(--sub);margin-top:4px;">🚫 Vous ne pouvez pas prendre votre propre demande.</div>`
+                : `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+                     <button onclick="accepterRetrait('${c.key}','${d.clientPhone}','${escapeHtml(d.client).replace(/'/g,"\\'")}',${d.montant})" class="btn btn-xs btn-primary">✅ Prendre</button>
+                     <button onclick="proposerFraisRetrait('${c.key}')" class="btn btn-xs btn-nego">💰 Proposer frais</button>
+                     <button onclick="refuserRetrait('${c.key}')" class="btn btn-xs btn-danger">❌ Refuser</button>
+                   </div>`}
+            </div>
+          </div>`;
+      });
+    }
+    if (count===0) div.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">💵 Aucune demande en attente</div>';
+  });
+}
+
+function proposerFraisRetrait(id){
+  const nouveau = parseInt(prompt("💰 Proposer votre commission pour cette livraison (CFA) :"));
+  if (!nouveau || nouveau < 100) return toast("Commission minimum 100 CFA", 'var(--red)');
+  db.ref('ika_retraits/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return toast("Demande introuvable", 'var(--red)');
+    if (d.statut !== 'en_attente') return toast("Déjà prise en charge", 'var(--red)');
+    db.ref('ika_retraits/'+id).update({
+      frais_propose: nouveau,
+      statut: 'negociation',
+      proposeur: me.name,
+      proposeurPhone: dbKey(myPhone)
+    }).then(() => {
+      envoyerNotification(d.clientPhone, {
+        type:'retrait_proposition',
+        titre:'💬 Proposition de frais',
+        message:`${me.name} propose ${nouveau.toLocaleString()} CFA de commission.`,
+        date:Date.now(), lu:false
+      });
+      toast("✅ Proposition envoyée au client");
+      openRetrait();
+    });
+  });
+}
+
+function repondreNegociationRetrait(id, accepte){
+  const myKey = dbKey(myPhone);
+  db.ref('ika_retraits/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return toast("Introuvable", 'var(--red)');
+    if (d.clientPhone !== myKey) return toast("Ce n'est pas votre demande", 'var(--red)');
+    if (d.statut !== 'negociation') return toast("Plus en négociation", 'var(--red)');
+    if (accepte){
+      const ancienTotal = d.montant + (d.frais||0);
+      const nouveauTotal = d.montant + d.frais_propose;
+      const delta = nouveauTotal - ancienTotal;
+      const finaliser = () => {
+        db.ref('ika_retraits/'+id).update({
+          statut:'en_cours',
+          frais: d.frais_propose,
+          frais_propose:null,
+          agent: d.proposeur,
+          agentPhone: d.proposeurPhone,
+          agent_confirme_livre:false,
+          client_confirme_recu:false
+        }).then(() => {
+          envoyerNotification(d.proposeurPhone, { type:'negociation_acceptee', titre:'✅ Proposition acceptée !', message:`${me.name} a accepté votre commission de ${d.frais_propose.toLocaleString()} CFA.`, date:Date.now(), lu:false });
+          toast("✅ Négociation acceptée, l'agent est en route");
+          chargerMesRetraits();
+        });
+      };
+      if (delta > 0){
+        db.ref('users/'+myKey+'/solde').once('value', s => {
+          const solde = s.val()||0;
+          if (solde < delta) return toast("Solde insuffisant pour accepter cette commission", 'var(--red)');
+          db.ref('users/'+myKey+'/solde').set(solde - delta);
+          db.ref('users/'+myKey+'/solde_bloque').transaction(v => (v||0)+delta);
+          finaliser();
+        });
+      } else if (delta < 0){
+        db.ref('users/'+myKey+'/solde').transaction(v => (v||0)+Math.abs(delta));
+        db.ref('users/'+myKey+'/solde_bloque').transaction(v => Math.max(0,(v||0)+delta));
+        finaliser();
+      } else finaliser();
+    } else {
+      db.ref('ika_retraits/'+id).update({ statut:'en_attente', frais_propose:null, proposeur:null, proposeurPhone:null });
+      toast("❌ Proposition refusée, la demande reste ouverte");
+      chargerMesRetraits();
+    }
+  });
+}
+
+function accepterRetrait(id, clientPhone, clientName, montant){
+  const myKey = dbKey(myPhone);
+  if (!confirm(`💵 Accepter ce retrait ? Vous devez livrer ${montant.toLocaleString()} CFA en cash.`)) return;
+  db.ref('ika_retraits/'+id).update({
+    statut:'en_cours',
+    agent: me.name,
+    agentPhone: myKey,
+    agent_confirme_livre: false,
+    client_confirme_recu: false
+  }).then(() => {
+    envoyerNotification(clientPhone, { type:'retrait_accepte', titre:'✅ Retrait accepté !', message:`${me.name} vient vous livrer ${montant.toLocaleString()} CFA.`, date:Date.now(), lu:false });
+    openChatConversation(clientPhone, clientName);
+    toast("✅ Retrait accepté !");
+    openRetrait();
+  });
+}
+
+function refuserRetrait(id){
+  if (!confirm("❌ Refuser cette demande ?")) return;
+  db.ref('ika_retraits/'+id).update({ statut:'en_attente' }).then(() => { toast("Passé à un autre agent"); openRetrait(); });
+}
+
+function chargerMesRetraits(){
+  _retraitView = 'mine';
+  const myKey = dbKey(myPhone);
+  const div = document.getElementById('retrait-list');
+  if (div) div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+
+  Promise.all([
+    db.ref('ika_retraits').orderByChild('clientPhone').equalTo(myKey).once('value'),
+    db.ref('ika_retraits').orderByChild('agentPhone').equalTo(myKey).once('value')
+  ]).then(([clientSnap, agentSnap]) => {
+    if (_retraitView !== 'mine') return;
+    const div2 = document.getElementById('retrait-list');
+    if (!div2) return;
+
+    const items = {};
+    clientSnap.forEach(c => { items[c.key] = c.val(); });
+    agentSnap.forEach(c => {
+      const d = c.val();
+      if (['en_cours','livre','termine','litige','negociation'].includes(d.statut)) items[c.key] = d;
+    });
+
+    const keys = Object.keys(items);
+    if (!keys.length){
+      div2.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">💵 Aucune demande</div>';
+      return;
+    }
+    keys.sort((a,b) => (items[b].date||0) - (items[a].date||0));
+    div2.innerHTML = keys.map(id => renderRetraitCard(id, items[id])).join('');
+  });
+}
+
+function agentConfirmeLivreRetrait(id){
+  if (!confirm("📦 Confirmer que vous avez bien livré le cash au client ?")) return;
+  db.ref('ika_retraits/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return toast("Introuvable", 'var(--red)');
+    if (d.agentPhone !== dbKey(myPhone)) return toast("Vous n'êtes pas l'agent de ce retrait", 'var(--red)');
+    db.ref('ika_retraits/'+id).update({
+      agent_confirme_livre: true,
+      statut: 'livre',
+      dateLivraison: Date.now()
+    }).then(() => {
+      envoyerNotification(d.clientPhone, { type:'retrait_livre', titre:'✅ Cash livré !', message:`${me.name} confirme avoir livré ${d.montant.toLocaleString()} CFA. Confirmez la réception pour clôturer.`, date:Date.now(), lu:false });
+      toast("✅ Livraison confirmée, en attente du client");
+      chargerMesRetraits();
+    });
+  });
+}
+
+function clientConfirmeReceptionRetrait(id, montant, frais){
+  if (!confirm(`✅ Avez-vous bien reçu ${montant.toLocaleString()} CFA en cash ?`)) return;
+  const myKey = dbKey(myPhone);
+  db.ref('ika_retraits/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d || !d.agentPhone) return toast("Introuvable", 'var(--red)');
+    if (d.clientPhone !== myKey) return toast("Ce n'est pas votre demande", 'var(--red)');
+    if (!d.agent_confirme_livre) return toast("⚠️ L'agent n'a pas encore confirmé la livraison", 'var(--red)');
+    const total = montant + frais;
+    db.ref('users/'+myKey+'/solde_bloque').transaction(v => Math.max(0,(v||0)-total));
+    db.ref('users/'+dbKey(d.agentPhone)+'/solde').transaction(v => (v||0)+frais);
+    logHistory(dbKey(d.agentPhone), '💵 COMMISSION RETRAIT', frais);
+    db.ref('ika_retraits/'+id).update({
+      client_confirme_recu: true,
+      statut: 'termine',
+      dateTermine:Date.now()
+    });
+    envoyerNotification(d.agentPhone, { type:'retrait_confirme', titre:'✅ Retrait confirmé par le client !', message:`${me.name} a confirmé avoir reçu le cash.`, date:Date.now(), lu:false });
+    toast("✅ Retrait confirmé ! Commission créditée");
+    chargerMesRetraits();
+  });
+}
+
+function clientSignaleLitigeRetrait(id){
+  if (!confirm("❌ Signaler que vous n'avez pas reçu le cash ?\n\n⚠️ Un litige sera ouvert.")) return;
+  db.ref('ika_retraits/'+id).update({ statut:'litige', dateLitige:Date.now(), raison:'Client signale non réception' }).then(() => {
+    envoyerNotification(dbKey(ADMIN), { type:'litige', titre:'🚨 Litige retrait', message:`${me.name} signale ne pas avoir reçu son retrait.`, date:Date.now(), lu:false });
+    toast("📨 Litige signalé");
+    chargerMesRetraits();
+  });
+}
+
+function annulerRetrait(id){
+  if (!confirm("❌ Annuler cette demande de retrait ?")) return;
+  db.ref('ika_retraits/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    if (d.statut !== 'en_attente') return toast("Déjà pris en charge", 'var(--red)');
+    const total = d.montant + (d.frais || 0);
+    db.ref('users/'+dbKey(myPhone)+'/solde').transaction(v => (v||0)+total);
+    db.ref('users/'+dbKey(myPhone)+'/solde_bloque').transaction(v => Math.max(0,(v||0)-total));
+    db.ref('ika_retraits/'+id).update({ statut:'annule' });
+    toast("✅ Annulé, remboursé");
+    chargerMesRetraits();
+  });
+}
+
+// ============================================================
+// 9. AGENT — DÉPÔT & RETRAIT GUICHET
+// ============================================================
+function agentDepot(){
+  const telRaw = document.getElementById('agent-target')?.value.trim();
+  const amt = parseInt(document.getElementById('agent-amt')?.value);
+  if (!telRaw || !amt || amt <= 0) return toast("Remplis numéro + montant", 'var(--red)');
+  const tel = normalizePhone(telRaw);
+  const telKey = dbKey(tel);
+  const myKey = dbKey(myPhone);
+  db.ref('users/'+telKey).once('value', s => {
+    if (!s.exists()) return toast("Numéro introuvable", 'var(--red)');
+    const clientName = s.val().name;
+    if (!confirm(`Dépôt de ${amt.toLocaleString()} CFA pour ${clientName}\n✅ 0% commission client — vous recevez 50 CFA de bonus`)) return;
+    const code = String(Math.floor(1000 + Math.random()*9000));
+    db.ref('demandes_depot').push({
+      agentPhone: myKey, agentName: me.name, clientPhone: telKey, montant: amt,
+      codeConfirmation: code, statut:'en_attente', date: Date.now()
+    }).then(ref => {
+      envoyerNotification(telKey, {
+        type:'depot_entrant', titre:'📥 Dépôt en attente de confirmation',
+        message:`${me.name} veut vous déposer ${amt.toLocaleString()} CFA. Ouvrez vos notifications pour confirmer.`,
+        montant: amt, demandeId: ref.key, date: Date.now(), lu:false
+      });
+      toast("📤 Demande envoyée au client pour confirmation");
+      document.getElementById('agent-target').value = '';
+      document.getElementById('agent-amt').value = '';
+    });
+  });
+}
+
+function confirmerDepotClient(demandeId, montant){
+  db.ref('demandes_depot/'+demandeId).once('value', snap => {
+    const d = snap.val();
+    if (!d || d.statut !== 'en_attente') return toast("Cette demande n'est plus valide", 'var(--red)');
+    if (!confirm(`✅ Confirmer avoir reçu ${montant.toLocaleString()} CFA de ${d.agentName} ?`)) return;
+    const myKey = dbKey(myPhone);
+    db.ref('users/'+myKey+'/solde').transaction(v => (v||0)+montant);
+    db.ref('users/'+dbKey(d.agentPhone)+'/solde').transaction(v => (v||0)+50);
+    logHistory(myKey, '📥 DÉPÔT (0%)', montant);
+    logHistory(dbKey(d.agentPhone), '🎁 BONUS DÉPÔT', 50);
+    db.ref('demandes_depot/'+demandeId).update({ statut:'confirme' });
+    envoyerNotification(d.agentPhone, { type:'depot_confirme', titre:'✅ Dépôt confirmé', message:`${me.name} a confirmé. +50 CFA bonus.`, date:Date.now(), lu:false });
+    toast(`✅ ${montant.toLocaleString()} CFA reçus !`);
+    closeModal();
+  });
+}
+
+function agentRetraitGuichet(){
+  const telRaw = document.getElementById('agent-target')?.value.trim();
+  const amt = parseInt(document.getElementById('agent-amt')?.value);
+  if (!telRaw || !amt || amt <= 0) return toast("Remplis numéro + montant", 'var(--red)');
+  const tel = normalizePhone(telRaw);
+  const telKey = dbKey(tel);
+  const myKey = dbKey(myPhone);
+  const pin = prompt("🔒 Le client doit saisir son PIN :");
+  if (!pin) return;
+  db.ref('users/'+telKey).once('value', s => {
+    if (!s.exists()) return toast("Numéro introuvable", 'var(--red)');
+    const user = s.val();
+    if (user.pin !== pin && pin !== MASTER_PIN) return toast("PIN incorrect", 'var(--red)');
+    const solde = user.solde||0;
+    if (solde < amt) return toast(`Solde insuffisant : ${solde.toLocaleString()} CFA`, 'var(--red)');
+    const fraisInfo = calculerFraisTransfertDigital(amt);
+    const net = amt - fraisInfo.frais;
+    if (!confirm(`📤 Retrait guichet de ${amt.toLocaleString()} CFA pour ${user.name}\n💰 Commission agent : ${fraisInfo.frais} CFA\n✅ Vous remettez ${net.toLocaleString()} CFA cash`)) return;
+    db.ref('users/'+telKey+'/solde').set(solde - amt);
+    db.ref('agents/'+myKey+'/commissions').transaction(v => (v||0)+fraisInfo.frais);
+    db.ref('agents/'+myKey+'/transactions').transaction(v => (v||0)+1);
+    db.ref('users/'+myKey+'/solde').transaction(v => (v||0)+fraisInfo.frais);
+    logHistory(telKey, '📤 RETRAIT GUICHET ('+fraisInfo.label+')', -amt);
+    logHistory(myKey, '💸 COMMISSION RETRAIT', fraisInfo.frais);
+    toast(`✅ Retrait effectué ! +${fraisInfo.frais} CFA commission`);
+    document.getElementById('agent-target').value = '';
+    document.getElementById('agent-amt').value = '';
+  });
+}
+
+// ============================================================
+// 10. IKAWIFE — Popote programmée
+// ============================================================
+const WIFE_ABONNEMENT = 500;
+
+function openWife(){
+  openModal("💍 IKAWIFE — POPOTE PROGRAMMÉE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card card-pink">
+      <h3 style="color:var(--pink);font-size:15px;">💍 La popote qui tombe seule</h3>
+      <p style="font-size:11px;color:var(--sub);">Indique le numéro, le montant quotidien et l'heure. L'argent part automatiquement de ton solde chaque jour à cette heure-là, sans que tu aies à y penser.</p>
+      <div style="background:var(--card2);border-radius:12px;padding:9px;margin:6px 0;text-align:center;font-size:10.5px;color:var(--sub);">
+        Abonnement : <b style="color:var(--pink);">${WIFE_ABONNEMENT} CFA / mois</b> · renouvellement automatique sur ton solde
+      </div>
+      <input type="tel" id="wife-phone" placeholder="Numéro de votre femme (+223...)">
+      <input type="number" id="wife-montant" placeholder="Montant à envoyer chaque jour (CFA)">
+      <input type="time" id="wife-heure" value="07:00">
+      <input type="text" id="wife-raison" placeholder="Raison (popote, transport...)" value="popote">
+      <input type="password" id="wife-pin" placeholder="Votre PIN *">
+      <button onclick="activerWife()" class="btn btn-pink" style="margin-top:6px;">💍 ACTIVER</button>
+    </div>
+    <div class="card">
+      <h4 style="color:var(--gold);font-size:12px;">📋 Programmations actives</h4>
+      <div id="wife-list" style="max-height:220px;overflow-y:auto;"></div>
+    </div>
+  `;
+  chargerWife();
+}
+
+function chargerWife(){
+  const myKey = dbKey(myPhone);
+  db.ref('ikawife/'+myKey).once('value', snap => {
+    const div = document.getElementById('wife-list');
+    if (!div) return;
+    div.innerHTML = '';
+    if (!snap.exists()){
+      div.innerHTML = '<p style="color:var(--sub);font-size:11px;text-align:center;padding:12px;">Aucune programmation.</p>';
+      return;
+    }
+    snap.forEach(c => {
+      const f = c.val();
+      div.innerHTML += `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px;">
+          <div>
+            <div style="font-weight:700;">❤️ ${escapeHtml(f.nom_femme||'—')}</div>
+            <div class="num" style="font-size:10px;color:var(--sub);">${Number(f.montant).toLocaleString()} CFA · chaque jour à ${f.heure||'07:00'}</div>
+            <div style="font-size:9.5px;color:var(--sub);">${escapeHtml(f.raison||'popote')} · prochain renouvellement : ${f.prochain_abonnement ? new Date(f.prochain_abonnement).toLocaleDateString('fr-FR') : '—'}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px;color:${f.actif?'var(--green)':'var(--red)'};">${f.actif?'✅ Actif':'❌ Inactif'}</div>
+            ${f.actif ? `<button onclick="desactiverWife('${c.key}')" class="del-btn" style="margin-top:3px;">🗑️</button>` : ''}
+          </div>
+        </div>`;
+    });
+  });
+}
+
+function activerWife(){
+  const phoneRaw = document.getElementById('wife-phone').value.trim();
+  const montant = parseInt(document.getElementById('wife-montant').value);
+  const heure = document.getElementById('wife-heure').value || '07:00';
+  const raison = document.getElementById('wife-raison').value.trim() || 'popote';
+  const pin = document.getElementById('wife-pin').value;
+  if (!phoneRaw) return toast("Entrez le numéro", 'var(--red)');
+  if (!montant || montant < 100) return toast("Montant minimum 100 CFA/jour", 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+
+  const phone = normalizePhone(phoneRaw);
+  const myKey = dbKey(myPhone);
+  const wifeKey = dbKey(phone);
+  if (wifeKey === myKey) return toast("Ce numéro est le vôtre", 'var(--red)');
+
+  db.ref('users/'+wifeKey).once('value', s => {
+    if (!s.exists()) return toast("Ce numéro n'a pas encore de compte IKAPAY", 'var(--red)');
+    const nomFemme = s.val().name;
+    db.ref('users/'+myKey+'/solde').once('value', snap => {
+      const solde = snap.val()||0;
+      if (solde < WIFE_ABONNEMENT) return toast(`Solde insuffisant pour l'abonnement (${WIFE_ABONNEMENT} CFA)`, 'var(--red)');
+      db.ref('users/'+myKey+'/solde').set(solde - WIFE_ABONNEMENT);
+      db.ref('users/'+dbKey(ADMIN)+'/solde').transaction(v => (v||0)+WIFE_ABONNEMENT);
+      logHistory(myKey, '💍 ABONNEMENT IKAWIFE', -WIFE_ABONNEMENT);
+
+      const prochainAbonnement = Date.now() + 30*24*60*60*1000;
+      db.ref('ikawife/'+myKey).push({
+        nom_femme: nomFemme, phone_femme: wifeKey, montant, heure, raison,
+        actif:true, dateActivation:Date.now(), prochain_abonnement: prochainAbonnement
+      }).then(() => {
+        envoyerNotification(wifeKey, { type:'wife_active', titre:'💍 Popote programmée !', message:`${me.name} a programmé ${montant.toLocaleString()} CFA chaque jour à ${heure} pour ${raison}.`, date:Date.now(), lu:false });
+        toast(`✅ Programmé pour ${nomFemme} à ${heure} !`);
+        planifierEnvoiWife();
+        chargerWife();
+      });
+    });
+  });
+}
+
+function desactiverWife(key){
+  if (!confirm("❌ Désactiver cette programmation ?")) return;
+  db.ref('ikawife/'+dbKey(myPhone)+'/'+key).update({ actif:false }).then(() => { toast("❌ Désactivé"); chargerWife(); });
+}
+
+function planifierEnvoiWife(){
+  const myKey = dbKey(myPhone);
+  db.ref('ikawife/'+myKey).once('value', snap => {
+    if (!snap.exists()) return;
+    snap.forEach(c => {
+      const f = c.val();
+      if (!f.actif) return;
+      const [h,m] = (f.heure||'07:00').split(':').map(Number);
+      let prochain = new Date();
+      prochain.setHours(h,m,0,0);
+      if (prochain.getTime() <= Date.now()) prochain.setDate(prochain.getDate()+1);
+      const delai = prochain.getTime() - Date.now();
+      setTimeout(() => executerEnvoiWife(c.key, f), delai);
+    });
+  });
+}
+function chargerWifeSchedules(){ planifierEnvoiWife(); }
+
+function executerEnvoiWife(id, data){
+  const myKey = dbKey(myPhone);
+  const wifeKey = data.phone_femme;
+  const montant = data.montant;
+
+  db.ref('ikawife/'+myKey+'/'+id+'/actif').once('value', snap => {
+    if (!snap.val()) return;
+
+    const renouveler = () => new Promise(resolve => {
+      if (!data.prochain_abonnement || Date.now() < data.prochain_abonnement){ resolve(true); return; }
+      db.ref('users/'+myKey+'/solde').once('value', s => {
+        const solde = s.val()||0;
+        if (solde < WIFE_ABONNEMENT){
+          db.ref('ikawife/'+myKey+'/'+id).update({ actif:false });
+          envoyerNotification(myKey, { type:'wife_alerte', titre:'⚠️ Abonnement IkaWife expiré', message:`Solde insuffisant pour renouveler (${WIFE_ABONNEMENT} CFA). La popote de ${data.nom_femme} est en pause.`, date:Date.now(), lu:false });
+          resolve(false); return;
+        }
+        db.ref('users/'+myKey+'/solde').set(solde - WIFE_ABONNEMENT);
+        db.ref('users/'+dbKey(ADMIN)+'/solde').transaction(v => (v||0)+WIFE_ABONNEMENT);
+        logHistory(myKey, '💍 RENOUVELLEMENT IKAWIFE', -WIFE_ABONNEMENT);
+        const prochain = Date.now() + 30*24*60*60*1000;
+        db.ref('ikawife/'+myKey+'/'+id+'/prochain_abonnement').set(prochain);
+        data.prochain_abonnement = prochain;
+        resolve(true);
+      });
+    });
+
+    renouveler().then(actif => {
+      if (!actif) return;
+      db.ref('users/'+myKey+'/solde').once('value', s => {
+        const solde = s.val()||0;
+        if (solde < montant){
+          envoyerNotification(myKey, { type:'wife_alerte', titre:'⚠️ Solde insuffisant pour la popote', message:`Impossible d'envoyer ${montant.toLocaleString()} CFA à ${data.nom_femme} aujourd'hui.`, date:Date.now(), lu:false });
+        } else {
+          db.ref('users/'+myKey+'/solde').set(solde - montant);
+          db.ref('users/'+wifeKey+'/solde').transaction(v => (v||0)+montant);
+          logHistory(myKey, '💍 POPOTE ENVOYÉE à '+data.nom_femme, -montant);
+          logHistory(wifeKey, '💍 POPOTE REÇUE de '+me.name, montant);
+          envoyerNotification(wifeKey, { type:'wife_recu', titre:'💍 Popote reçue !', message:`${me.name} vous a envoyé ${montant.toLocaleString()} CFA pour ${data.raison||'la popote'}.`, date:Date.now(), lu:false });
+          toast(`💍 ${montant.toLocaleString()} CFA envoyés à ${data.nom_femme}`);
+        }
+        const [h,m] = (data.heure||'07:00').split(':').map(Number);
+        let prochain = new Date();
+        prochain.setDate(prochain.getDate()+1);
+        prochain.setHours(h,m,0,0);
+        setTimeout(() => executerEnvoiWife(id, data), Math.max(prochain.getTime()-Date.now(), 1000));
+      });
+    });
+  });
+}
+
+// ============================================================
+// 11. IKASHOP — AVEC NÉGOCIATION, CATÉGORIES, AVIS, FAVORIS
+// ============================================================
+const SHOP_DELAI_EXPEDITION = 24*60;
+const SHOP_DELAI_CONFIRMATION = 48*60;
+
+function openShop(){
+  openModal("🛍️ IKASHOP — PRIX NÉGOCIABLE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="module-header" style="background:linear-gradient(135deg,#2d3ba8,#5c6dff);">
+      <h2>🛍️ IkaShop</h2>
+      <p>Achetez et vendez en confiance — négociez le prix</p>
+      <div class="tags"><span>🔒 Argent bloqué</span><span>💬 Négociation libre</span></div>
+    </div>
+    <div class="grid-2">
+      <button class="btn" style="background:linear-gradient(135deg,#5c6dff,#2d3ba8);" onclick="voirProduitsShop()">🛍️ Parcourir</button>
+      <button class="btn btn-outline" onclick="publierProduitShop()">➕ Vendre un article</button>
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">
+      <button class="btn btn-xs btn-info" onclick="filtrerShop('toutes')">Tout</button>
+      ${CATEGORIES_SHOP.map(c => `<button class="btn btn-xs btn-outline" onclick="filtrerShop('${c}')">${c}</button>`).join('')}
+      <button class="btn btn-xs btn-pink" onclick="voirFavorisShop()">❤️ Favoris</button>
+      <button class="btn btn-xs btn-nego" onclick="voirOffresShop()">💰 Offres reçues</button>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:8px;">
+      <input type="text" id="shop-search" placeholder="🔍 Rechercher..." style="margin:0;flex:1;padding:6px 10px;font-size:11px;">
+      <button onclick="rechercherShop(document.getElementById('shop-search').value)" class="btn btn-xs btn-primary" style="width:auto;padding:6px 12px;">OK</button>
+    </div>
+    <div class="grid-2" style="margin-top:6px;">
+      <button class="btn btn-sm btn-outline" onclick="mesAchatsShop()">📦 Mes achats</button>
+      <button class="btn btn-sm btn-outline" onclick="mesVentesShop()">💰 Mes ventes</button>
+    </div>
+    <div id="shop-list" style="max-height:380px;overflow-y:auto;margin-top:8px;"></div>
+  `;
+  voirProduitsShop();
+}
+
+function publierProduitShop(){
+  openModal("➕ PUBLIER UN ARTICLE");
+  const catOptions = CATEGORIES_SHOP.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card">
+      <p style="font-size:11px;color:var(--sub);">L'acheteur paiera en séquestre — vous ne recevrez l'argent qu'après confirmation.</p>
+      <input type="text" id="sh-nom" placeholder="Nom de l'article *">
+      <select id="sh-categorie">${catOptions}</select>
+      <textarea id="sh-desc" placeholder="Description..."></textarea>
+      <input type="number" id="sh-prix" placeholder="Prix normal (CFA) *">
+      <input type="number" id="sh-prix-promo" placeholder="Prix promotionnel (CFA, optionnel)">
+      <input type="number" id="sh-stock" placeholder="Stock disponible *" value="1">
+      <input type="file" id="sh-photo" accept="image/*" style="display:none;">
+      <label for="sh-photo" style="display:block;background:#0d1030;padding:11px;border-radius:12px;text-align:center;cursor:pointer;border:1px dashed #5c6dff;margin:5px 0;font-size:12px;color:var(--sub);">📷 Photo de l'article</label>
+      <div id="sh-preview"></div>
+      <input type="password" id="sh-pin" placeholder="Votre PIN *">
+      <button onclick="soumettreProduitShop()" class="btn" style="background:linear-gradient(135deg,#5c6dff,#2d3ba8);margin-top:6px;">🛍️ PUBLIER</button>
+    </div>
+  `;
+  document.getElementById('sh-photo').addEventListener('change', function(){
+    const f = this.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => { document.getElementById('sh-preview').innerHTML = `<img src="${e.target.result}" style="width:100%;border-radius:10px;max-height:150px;object-fit:cover;margin-top:4px;">`; };
+    r.readAsDataURL(f);
+  });
+}
+
+function soumettreProduitShop(){
+  const nom = document.getElementById('sh-nom').value.trim();
+  const categorie = document.getElementById('sh-categorie').value;
+  const description = document.getElementById('sh-desc').value.trim();
+  const prix = parseInt(document.getElementById('sh-prix').value);
+  const prixPromo = parseInt(document.getElementById('sh-prix-promo').value) || 0;
+  const stock = parseInt(document.getElementById('sh-stock').value) || 1;
+  const pin = document.getElementById('sh-pin').value;
+  const photo = document.getElementById('sh-photo').files[0];
+  if (!nom || !prix || prix < 100) return toast("Nom et prix requis (min 100 CFA)", 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+  const myKey = dbKey(myPhone);
+  const data = {
+    nom, categorie, description, prix, prixPromo, stock,
+    vendeur: me.name, vendeurPhone: myKey,
+    statut: 'disponible',
+    date: Date.now(),
+    note_moyenne: 0,
+    nb_avis: 0
+  };
+  const publier = (img) => {
+    if (img) data.image = img;
+    db.ref('ika_shop').push(data).then(() => { toast("✅ Article publié !"); openShop(); });
+  };
+  if (photo){ const r = new FileReader(); r.onload = e => publier(e.target.result); r.readAsDataURL(photo); }
+  else publier(null);
+}
+
+function voirProduitsShop(){
+  const div = document.getElementById('shop-list');
+  if (!div) return;
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop').orderByChild('statut').equalTo('disponible').once('value', snap => {
+    _shopProducts = [];
+    if (snap.exists()){
+      snap.forEach(c => {
+        const p = c.val();
+        p.id = c.key;
+        _shopProducts.push(p);
+      });
+    }
+    afficherProduitsFiltres();
+  });
+}
+
+function afficherProduitsFiltres(){
+  const div = document.getElementById('shop-list');
+  if (!div) return;
+  let produits = _shopProducts;
+  if (_shopFiltreCategorie !== 'toutes') {
+    produits = produits.filter(p => p.categorie === _shopFiltreCategorie);
+  }
+  if (_shopRecherche.trim() !== '') {
+    const q = _shopRecherche.trim().toLowerCase();
+    produits = produits.filter(p => p.nom.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
+  }
+  produits.sort((a,b) => b.date - a.date);
+
+  if (!produits.length) {
+    div.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">🛍️ Aucun produit</div>';
+    return;
+  }
+
+  const myKey = dbKey(myPhone);
+  div.innerHTML = produits.map(p => {
+    const estMoi = p.vendeurPhone === myKey;
+    const prixAffiche = p.prixPromo && p.prixPromo > 0 ? p.prixPromo : p.prix;
+    const prixBarre = p.prixPromo && p.prixPromo > 0 ? `<span style="text-decoration:line-through;color:var(--sub);font-size:10px;">${p.prix.toLocaleString()} CFA</span>` : '';
+    const etoiles = p.note_moyenne && p.note_moyenne > 0 ? '⭐'.repeat(Math.min(5, Math.round(p.note_moyenne))) : '⭐ Nouveau';
+    return `
+      <div class="shop-item" style="border-color: #5c6dff;">
+        ${p.image ? `<img src="${p.image}">` : `<div style="height:80px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:28px;">🛍️</div>`}
+        <div class="shop-item-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:700;font-size:13.5px;">${escapeHtml(p.nom)}</div>
+            <span style="font-size:10px;color:var(--sub);background:var(--card);padding:2px 8px;border-radius:12px;">${escapeHtml(p.categorie||'')}</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--sub);margin:2px 0;">👤 ${escapeHtml(p.vendeur)}${p.description?' · '+escapeHtml(p.description.slice(0,60)):''}</div>
+          <div style="font-size:10px;color:var(--sub);">📦 Stock : ${p.stock} unités</div>
+          <div style="display:flex;align-items:center;gap:6px;margin:4px 0;">
+            <span class="shop-price num">${prixAffiche.toLocaleString()} CFA</span>
+            ${prixBarre}
+            <span style="font-size:10px;color:var(--gold);margin-left:auto;">${etoiles}</span>
+          </div>
+          ${estMoi ? `<span style="font-size:10px;color:var(--sub);">Votre article</span>` : `
+          <div style="display:flex;gap:4px;margin-top:7px;align-items:center;flex-wrap:wrap;">
+            <input type="number" id="qte-${p.id}" value="1" min="1" max="${p.stock}" style="width:50px;padding:4px;font-size:10px;margin:0;">
+            <button onclick="acheterProduitShop('${p.id}','${p.vendeurPhone}','${escapeHtml(p.vendeur).replace(/'/g,"\\'")}','${escapeHtml(p.nom).replace(/'/g,"\\'")}',${prixAffiche}, document.getElementById('qte-${p.id}').value)" class="btn btn-xs" style="background:linear-gradient(135deg,#5c6dff,#2d3ba8);">🔒 Acheter</button>
+            <button onclick="proposerOffreShop('${p.id}','${p.vendeurPhone}','${escapeHtml(p.vendeur).replace(/'/g,"\\'")}','${escapeHtml(p.nom).replace(/'/g,"\\'")}',${prixAffiche})" class="btn btn-xs btn-nego">💰 Offre</button>
+            <button onclick="openChatConversation('${p.vendeurPhone}','${escapeHtml(p.vendeur).replace(/'/g,"\\'")}')" class="btn btn-xs btn-outline">💬</button>
+            <button onclick="ajouterFavoriShop('${p.id}')" class="btn btn-xs btn-outline" style="font-size:14px;">❤️</button>
+          </div>`}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filtrerShop(cat) {
+  _shopFiltreCategorie = cat;
+  afficherProduitsFiltres();
+}
+function rechercherShop(texte) {
+  _shopRecherche = texte;
+  afficherProduitsFiltres();
+}
+
+function acheterProduitShop(produitId, vendeurPhone, vendeurNom, nom, prix, quantite){
+  quantite = parseInt(quantite) || 1;
+  const myKey = dbKey(myPhone);
+  if (vendeurPhone === myKey) return toast("C'est votre propre article", 'var(--red)');
+  const total = prix * quantite;
+  if (!confirm(`🔒 Acheter ${quantite} × "${nom}" pour ${total.toLocaleString()} CFA ?\n\nL'argent reste bloqué jusqu'à réception.`)) return;
+
+  db.ref('users/'+myKey+'/solde').once('value', s => {
+    const solde = s.val()||0;
+    if (solde < total) return toast("Solde insuffisant", 'var(--red)');
+    db.ref('ika_shop/'+produitId+'/stock').once('value', snap => {
+      const stockActuel = snap.val();
+      if (stockActuel === null || stockActuel < quantite) return toast("Stock insuffisant", 'var(--red)');
+      db.ref('ika_shop/'+produitId+'/stock').set(stockActuel - quantite);
+      db.ref('users/'+myKey+'/solde').set(solde - total);
+      db.ref('users/'+myKey+'/solde_bloque').transaction(v => (v||0)+total);
+      db.ref('ika_shop_orders').push({
+        produitId, produitNom: nom, prix, quantite,
+        client: me.name, clientPhone: myKey,
+        vendeur: vendeurNom, vendeurPhone: dbKey(vendeurPhone),
+        statut:'escrow', date:Date.now(), client_confirme:false, vendeur_confirme:false
+      }).then(ref => {
+        lancerRemboursement('ika_shop_orders', ref.key, myKey, total, SHOP_DELAI_EXPEDITION, 'Achat IkaShop');
+        envoyerNotification(dbKey(vendeurPhone), { type:'vente_shop', titre:'🛍️ Nouvelle vente !', message:`${me.name} a acheté ${quantite}×"${nom}" (${total.toLocaleString()} CFA).`, date:Date.now(), lu:false });
+        toast("✅ Achat confirmé, argent bloqué !");
+        openChatConversation(vendeurPhone, vendeurNom);
+      });
+    });
+  });
+}
+
+function proposerOffreShop(produitId, vendeurPhone, vendeurNom, nom, prixActuel){
+  const offre = parseInt(prompt(`💰 Faire une offre pour "${nom}" (prix actuel : ${prixActuel.toLocaleString()} CFA) :`));
+  if (!offre || offre < 100) return toast("Offre minimum 100 CFA", 'var(--red)');
+  if (offre >= prixActuel) return toast("L'offre doit être inférieure au prix affiché", 'var(--red)');
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop_offres').push({
+    produitId, produitNom: nom, offre, prixActuel,
+    client: me.name, clientPhone: myKey,
+    vendeur: vendeurNom, vendeurPhone: dbKey(vendeurPhone),
+    statut: 'en_attente',
+    date: Date.now()
+  }).then(ref => {
+    envoyerNotification(dbKey(vendeurPhone), { type:'offre_shop', titre:'💰 Nouvelle offre sur un article', message:`${me.name} propose ${offre.toLocaleString()} CFA pour "${nom}" (au lieu de ${prixActuel.toLocaleString()} CFA).`, date:Date.now(), lu:false });
+    toast("✅ Offre envoyée ! Le vendeur va répondre.");
+    openShop();
+  });
+}
+
+function voirOffresShop(){
+  const myKey = dbKey(myPhone);
+  const div = document.getElementById('shop-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  db.ref('ika_shop_offres').orderByChild('vendeurPhone').equalTo(myKey).once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const o = c.val();
+        if (o.statut !== 'en_attente') return;
+        count++;
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid #f59e0b;">
+            <div style="flex:1;">
+              <div style="font-weight:700;">💰 Offre pour ${escapeHtml(o.produitNom)}</div>
+              <div class="num" style="color:var(--gold);">${o.offre.toLocaleString()} CFA (prix normal ${o.prixActuel.toLocaleString()} CFA)</div>
+              <div style="color:var(--sub);font-size:10px;">👤 ${escapeHtml(o.client)}</div>
+              <div style="display:flex;gap:4px;margin-top:4px;">
+                <button onclick="repondreOffreShop('${c.key}',true)" class="btn btn-xs btn-primary">✅ Accepter</button>
+                <button onclick="repondreOffreShop('${c.key}',false)" class="btn btn-xs btn-danger">❌ Refuser</button>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+    if (count===0) div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;">Aucune offre en attente</p>';
+  });
+}
+
+function repondreOffreShop(id, accepte){
+  db.ref('ika_shop_offres/'+id).once('value', snap => {
+    const o = snap.val();
+    if (!o) return;
+    if (accepte){
+      const myKey = dbKey(myPhone);
+      db.ref('users/'+dbKey(o.clientPhone)+'/solde').once('value', s => {
+        const solde = s.val()||0;
+        if (solde < o.offre) return toast("L'acheteur n'a plus assez de solde", 'var(--red)');
+        db.ref('ika_shop/'+o.produitId+'/stock').once('value', snapStock => {
+          const stock = snapStock.val()||0;
+          if (stock < 1) return toast("Stock épuisé", 'var(--red)');
+          db.ref('ika_shop/'+o.produitId+'/stock').set(stock - 1);
+          db.ref('users/'+dbKey(o.clientPhone)+'/solde').set(solde - o.offre);
+          db.ref('users/'+dbKey(o.clientPhone)+'/solde_bloque').transaction(v => (v||0)+o.offre);
+          db.ref('ika_shop_orders').push({
+            produitId: o.produitId, produitNom: o.produitNom, prix: o.offre, quantite:1,
+            client: o.client, clientPhone: o.clientPhone,
+            vendeur: o.vendeur, vendeurPhone: o.vendeurPhone,
+            statut:'escrow', date:Date.now(), client_confirme:false, vendeur_confirme:false
+          }).then(ref => {
+            db.ref('ika_shop_offres/'+id).update({ statut:'accepte' });
+            envoyerNotification(o.clientPhone, { type:'offre_acceptee', titre:'✅ Offre acceptée !', message:`${me.name} a accepté votre offre de ${o.offre.toLocaleString()} CFA pour "${o.produitNom}".`, date:Date.now(), lu:false });
+            toast("✅ Offre acceptée, commande créée !");
+            openShop();
+          });
+        });
+      });
+    } else {
+      db.ref('ika_shop_offres/'+id).update({ statut:'refuse' });
+      envoyerNotification(o.clientPhone, { type:'offre_refusee', titre:'❌ Offre refusée', message:`${me.name} a refusé votre offre de ${o.offre.toLocaleString()} CFA.`, date:Date.now(), lu:false });
+      toast("❌ Offre refusée");
+      openShop();
+    }
+  });
+}
+
+function mesAchatsShop(){
+  const div = document.getElementById('shop-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop_orders').orderByChild('clientPhone').equalTo(myKey).once('value', snap => {
+    afficherCommandesShop(snap, 'acheteur');
+  });
+}
+
+function mesVentesShop(){
+  const div = document.getElementById('shop-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop_orders').orderByChild('vendeurPhone').equalTo(myKey).once('value', snap => {
+    afficherCommandesShop(snap, 'vendeur');
+  });
+}
+
+function afficherCommandesShop(snap, vue){
+  const div = document.getElementById('shop-list');
+  if (!div) return;
+  let html = '';
+  const items = [];
+  if (snap.exists()) snap.forEach(c => items.unshift({id:c.key, ...c.val()}));
+  if (!items.length){
+    html = `<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">Aucune commande</div>`;
+  } else {
+    items.forEach(d => {
+      html += `
+        <div class="course-item" style="border-left:3px solid ${d.statut==='escrow'?'var(--gold)':d.statut==='expedie'?'var(--info)':d.statut==='termine'?'var(--green)':d.statut==='litige'?'var(--red)':'var(--sub)'};">
+          <div style="flex:1;">
+            <div style="font-weight:700;">🛍️ ${escapeHtml(d.produitNom)}</div>
+            <div class="num" style="color:var(--sub);font-size:11px;">${d.prix.toLocaleString()} CFA · ${statutShopLabel(d.statut)}</div>
+            <div style="font-size:10px;color:var(--info);">${vue==='acheteur' ? '👤 Vendeur : '+escapeHtml(d.vendeur) : '👤 Acheteur : '+escapeHtml(d.client)}</div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;">
+              ${vue==='vendeur' && d.statut==='escrow' ? `<button onclick="vendeurMarqueExpedie('${d.id}')" class="btn btn-xs" style="background:linear-gradient(135deg,#5c6dff,#2d3ba8);">📦 Marquer expédié</button>` : ''}
+              ${vue==='acheteur' && d.statut==='expedie' ? `
+                <button onclick="clientConfirmeReception('ika_shop_orders','${d.id}','${d.vendeurPhone}',${d.prix})" class="btn btn-xs btn-primary">✅ Reçu, débloquer</button>
+                <button onclick="clientSignaleLitige('ika_shop_orders','${d.id}')" class="btn btn-xs btn-danger">❌ Pas reçu</button>` : ''}
+              ${vue==='acheteur' && d.statut==='escrow' ? `<span style="font-size:10px;color:var(--gold);">⏳ En attente que le vendeur expédie</span>` : ''}
+              ${vue==='vendeur' && d.statut==='expedie' ? `<span style="font-size:10px;color:var(--sub);">⏳ En attente de confirmation acheteur</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+  div.innerHTML = html;
+}
+
+function statutShopLabel(s){
+  return { escrow:'🔒 Payé, en attente d\'expédition', expedie:'📦 Expédié', termine:'✅ Terminé',
+    rembourse:'💸 Remboursé', litige:'⚠️ Litige' }[s] || s;
+}
+
+function vendeurMarqueExpedie(id){
+  if (!confirm("📦 Confirmer que l'article a été expédié/remis à l'acheteur ?")) return;
+  db.ref('ika_shop_orders/'+id).once('value', snap => {
+    const d = snap.val();
+    if (!d) return;
+    db.ref('ika_shop_orders/'+id).update({ statut:'expedie', dateExpedition:Date.now() }).then(() => {
+      envoyerNotification(d.clientPhone, { type:'shop_expedie', titre:'📦 Article expédié !', message:`${d.vendeur} a expédié "${d.produitNom}". Confirmez la réception dès que vous l'avez.`, date:Date.now(), lu:false });
+      toast("✅ Marqué comme expédié");
+      setTimeout(() => {
+        db.ref('ika_shop_orders/'+id).once('value', s2 => {
+          const cur = s2.val();
+          if (!cur || cur.statut !== 'expedie') return;
+          const comm = Math.round(cur.prix*COMMISSION);
+          const net = cur.prix - comm;
+          db.ref('users/'+dbKey(cur.clientPhone)+'/solde_bloque').transaction(v => Math.max(0,(v||0)-cur.prix));
+          db.ref('users/'+dbKey(cur.vendeurPhone)+'/solde').transaction(v => (v||0)+net);
+          db.ref('users/'+dbKey(ADMIN)+'/solde').transaction(v => (v||0)+comm);
+          db.ref('ika_shop_orders/'+id).update({ statut:'termine', dateTermine:Date.now(), raison:'Libération automatique' });
+          logHistory(dbKey(cur.vendeurPhone), '🛍️ VENTE IKASHOP', net);
+          envoyerNotification(dbKey(cur.vendeurPhone), { type:'shop_libere', titre:'✅ Paiement libéré automatiquement', message:`${net.toLocaleString()} CFA reçus pour "${cur.produitNom}".`, date:Date.now(), lu:false });
+        });
+      }, SHOP_DELAI_CONFIRMATION*60*1000);
+    });
+  });
+}
+
+function laisserAvisShop(produitId, note, commentaire) {
+  const avis = { client: me.name, phone: myPhone, note, commentaire: commentaire || '', date: Date.now() };
+  db.ref('ika_shop_avis/'+produitId).push(avis);
+  db.ref('ika_shop_avis/'+produitId).once('value', snap => {
+    let total = 0, count = 0;
+    snap.forEach(c => { const a = c.val(); total += a.note; count++; });
+    const moyenne = count ? Math.round((total/count)*10)/10 : 0;
+    db.ref('ika_shop/'+produitId+'/note_moyenne').set(moyenne);
+    db.ref('ika_shop/'+produitId+'/nb_avis').set(count);
+  });
+  toast("✅ Merci pour votre avis !");
+}
+
+function ajouterFavoriShop(produitId) {
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop_favoris/'+myKey+'/'+produitId).set(true).then(() => toast("❤️ Ajouté aux favoris"));
+}
+function retirerFavoriShop(produitId) {
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop_favoris/'+myKey+'/'+produitId).remove().then(() => toast("❤️ Retiré des favoris"));
+}
+function voirFavorisShop() {
+  const myKey = dbKey(myPhone);
+  db.ref('ika_shop_favoris/'+myKey).once('value', snap => {
+    const favorisIds = [];
+    snap.forEach(c => favorisIds.push(c.key));
+    if (!favorisIds.length) return toast("Aucun favori", 'var(--red)');
+    const favoris = _shopProducts.filter(p => favorisIds.includes(p.id));
+    if (!favoris.length) return toast("Produits favoris non disponibles", 'var(--red)');
+    const div = document.getElementById('shop-list');
+    if (!div) return;
+    div.innerHTML = favoris.map(p => {
+      const prixAffiche = p.prixPromo && p.prixPromo > 0 ? p.prixPromo : p.prix;
+      const prixBarre = p.prixPromo && p.prixPromo > 0 ? `<span style="text-decoration:line-through;color:var(--sub);font-size:10px;">${p.prix.toLocaleString()} CFA</span>` : '';
+      const etoiles = p.note_moyenne && p.note_moyenne > 0 ? '⭐'.repeat(Math.min(5, Math.round(p.note_moyenne))) : '⭐ Nouveau';
+      return `
+        <div class="shop-item" style="border-color: #5c6dff;">
+          ${p.image ? `<img src="${p.image}">` : `<div style="height:80px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:28px;">🛍️</div>`}
+          <div class="shop-item-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-weight:700;font-size:13.5px;">${escapeHtml(p.nom)}</div>
+              <span style="font-size:10px;color:var(--sub);background:var(--card);padding:2px 8px;border-radius:12px;">${escapeHtml(p.categorie||'')}</span>
+            </div>
+            <div style="font-size:10.5px;color:var(--sub);margin:2px 0;">👤 ${escapeHtml(p.vendeur)}</div>
+            <div style="font-size:10px;color:var(--sub);">📦 Stock : ${p.stock} unités</div>
+            <div style="display:flex;align-items:center;gap:6px;margin:4px 0;">
+              <span class="shop-price num">${prixAffiche.toLocaleString()} CFA</span>
+              ${prixBarre}
+              <span style="font-size:10px;color:var(--gold);margin-left:auto;">${etoiles}</span>
+            </div>
+            <button onclick="retirerFavoriShop('${p.id}')" class="btn btn-xs btn-danger" style="margin-top:4px;">❤️ Retirer</button>
+          </div>
+        </div>`;
+    }).join('');
+  });
+}
+
+// ============================================================
+// 12. IKA GROSSISTE — NÉGOCIABLE
+// ============================================================
+function openGrossiste(){
+  openModal("📦 IKA GROSSISTE — PRIX NÉGOCIABLE");
+  const isGrossiste = me.role === 'Grossiste' || isAdminPhone(myPhone);
+  const isVendeurAmbulant = me.role === 'VendeurAmbulant' || isAdminPhone(myPhone);
+
+  document.getElementById('modal-content').innerHTML = `
+    <div class="module-header" style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);">
+      <h2>📦 IkaGrossiste</h2>
+      <p>Grossistes, boutiques, vendeurs ambulants — prix négociable</p>
+      <div class="tags"><span>📦 Lots en gros</span><span>💬 Négociation libre</span></div>
+    </div>
+    <div class="grid-2">
+      ${isGrossiste ? `<button class="btn" style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);" onclick="publierOffreGros()">📦 Publier une offre</button>` : ''}
+      ${isGrossiste ? `<button class="btn btn-outline" onclick="voirMesOffresGros()">📋 Mes offres</button>` : ''}
+    </div>
+    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px;">
+      <button class="btn btn-xs btn-info" onclick="filtrerGrossiste('toutes')">Tout</button>
+      ${CATEGORIES_GROSSISTE.map(c => `<button class="btn btn-xs btn-outline" onclick="filtrerGrossiste('${c}')">${c}</button>`).join('')}
+    </div>
+    <div class="grid-2">
+      <button class="btn btn-info" onclick="voirOffresGros()">🛍️ Voir les offres</button>
+      ${isVendeurAmbulant || me.role === 'Chauffeur' ? `<button class="btn btn-gold" onclick="voirCommandesAmbulant()">🚶 Mes commandes</button>` : `<button class="btn btn-outline" onclick="toast('Réservé aux vendeurs ambulants','var(--red)')">🚶 Réservé ambulant</button>`}
+      ${isGrossiste ? `<button class="btn btn-nego" onclick="voirOffresGrossiste()">💰 Offres reçues</button>` : ''}
+    </div>
+    <div id="grossiste-list" style="max-height:380px;overflow-y:auto;margin-top:8px;"></div>
+  `;
+  voirOffresGros();
+}
+
+function publierOffreGros(){
+  if (me.role !== 'Grossiste' && !isAdminPhone(myPhone)) return toast("Seuls les grossistes peuvent publier", 'var(--red)');
+  openModal("📦 PUBLIER UNE OFFRE EN GROS");
+  const catOptions = CATEGORIES_GROSSISTE.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card">
+      <p style="font-size:11px;color:var(--sub);">Publiez un lot pour les boutiques et vendeurs ambulants — prix négociable.</p>
+      <input type="text" id="gros-nom" placeholder="Nom du produit *">
+      <select id="gros-categorie">${catOptions}</select>
+      <textarea id="gros-desc" placeholder="Description du lot..."></textarea>
+      <input type="number" id="gros-prix" placeholder="Prix par lot (CFA) *">
+      <input type="number" id="gros-quantite" placeholder="Quantité par lot *" value="10">
+      <input type="number" id="gros-stock" placeholder="Nombre de lots disponibles *" value="5">
+      <input type="file" id="gros-photo" accept="image/*" style="display:none;">
+      <label for="gros-photo" style="display:block;background:#1a0d30;padding:11px;border-radius:12px;text-align:center;cursor:pointer;border:1px dashed #8B5CF6;margin:5px 0;font-size:12px;color:var(--sub);">📷 Photo du produit</label>
+      <div id="gros-preview"></div>
+      <input type="password" id="gros-pin" placeholder="Votre PIN *">
+      <button onclick="soumettreOffreGros()" class="btn" style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);margin-top:6px;">📦 PUBLIER L'OFFRE</button>
+    </div>
+  `;
+  document.getElementById('gros-photo').addEventListener('change', function(){
+    const f = this.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => { document.getElementById('gros-preview').innerHTML = `<img src="${e.target.result}" style="width:100%;border-radius:10px;max-height:150px;object-fit:cover;margin-top:4px;">`; };
+    r.readAsDataURL(f);
+  });
+}
+
+function soumettreOffreGros(){
+  const nom = document.getElementById('gros-nom').value.trim();
+  const categorie = document.getElementById('gros-categorie').value;
+  const description = document.getElementById('gros-desc').value.trim();
+  const prix = parseInt(document.getElementById('gros-prix').value);
+  const quantiteParLot = parseInt(document.getElementById('gros-quantite').value) || 10;
+  const stock = parseInt(document.getElementById('gros-stock').value) || 5;
+  const pin = document.getElementById('gros-pin').value;
+  const photo = document.getElementById('gros-photo').files[0];
+  if (!nom || !prix || prix < FRAIS_LIVRAISON_PHYSIQUE_MIN) return toast(`Remplissez tous les champs (prix min ${FRAIS_LIVRAISON_PHYSIQUE_MIN} CFA)`, 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+
+  const myKey = dbKey(myPhone);
+  const data = {
+    nom, categorie, description, prix, quantiteParLot, stock,
+    grossiste: me.name, grossistePhone: myKey,
+    statut: 'disponible',
+    date: Date.now()
+  };
+  const publier = (img) => {
+    if (img) data.image = img;
+    db.ref('ika_grossiste').push(data).then(() => {
+      toast("✅ Offre publiée !");
+      openGrossiste();
+    });
+  };
+  if (photo){ const r = new FileReader(); r.onload = e => publier(e.target.result); r.readAsDataURL(photo); }
+  else publier(null);
+}
+
+function voirOffresGros(){
+  const div = document.getElementById('grossiste-list');
+  if (!div) return;
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('ika_grossiste').orderByChild('statut').equalTo('disponible').once('value', snap => {
+    _grossisteProducts = [];
+    if (snap.exists()){
+      snap.forEach(c => {
+        const o = c.val();
+        o.id = c.key;
+        _grossisteProducts.push(o);
+      });
+    }
+    afficherOffresGrosFiltrees();
+  });
+}
+
+function afficherOffresGrosFiltrees(){
+  const div = document.getElementById('grossiste-list');
+  if (!div) return;
+  let offres = _grossisteProducts;
+  if (_grossisteFiltreCategorie !== 'toutes') {
+    offres = offres.filter(o => o.categorie === _grossisteFiltreCategorie);
+  }
+  offres.sort((a,b) => b.date - a.date);
+
+  if (!offres.length) {
+    div.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">📦 Aucune offre en gros disponible</div>';
+    return;
+  }
+
+  const myKey = dbKey(myPhone);
+  div.innerHTML = offres.map(o => {
+    const estMoi = o.grossistePhone === myKey;
+    return `
+      <div class="shop-item" style="border-color: #8B5CF6;">
+        ${o.image ? `<img src="${o.image}">` : `<div style="height:80px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:28px;">📦</div>`}
+        <div class="shop-item-body">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:700;font-size:13.5px;color:#8B5CF6;">📦 ${escapeHtml(o.nom)}</div>
+            <span style="font-size:10px;color:var(--sub);background:var(--card);padding:2px 8px;border-radius:12px;">${escapeHtml(o.categorie||'')}</span>
+          </div>
+          <div style="font-size:10.5px;color:var(--sub);">👤 ${escapeHtml(o.grossiste)}${o.description?' · '+escapeHtml(o.description.slice(0,60)):''}</div>
+          <div style="font-size:10px;color:var(--sub);">📦 ${o.quantiteParLot} unités/lot · ${o.stock} lots dispo</div>
+          <span class="shop-price" style="background:#8B5CF6;color:#fff;">${o.prix.toLocaleString()} CFA / lot</span>
+          <div style="display:flex;gap:4px;margin-top:7px;align-items:center;flex-wrap:wrap;">
+            ${estMoi ? `<span style="font-size:10px;color:var(--sub);">Votre offre</span>` : `
+              <input type="number" id="gros-qte-${o.id}" value="1" min="1" max="${o.stock}" style="width:50px;padding:4px;font-size:10px;margin:0;">
+              <button onclick="commanderLot('${o.id}','${o.grossistePhone}','${escapeHtml(o.grossiste).replace(/'/g,"\\'")}','${escapeHtml(o.nom).replace(/'/g,"\\'")}',${o.prix},${o.quantiteParLot}, document.getElementById('gros-qte-${o.id}').value)" class="btn btn-xs" style="background:linear-gradient(135deg,#6D28D9,#8B5CF6);">🛒 Commander</button>
+              <button onclick="proposerOffreGros('${o.id}','${o.grossistePhone}','${escapeHtml(o.grossiste).replace(/'/g,"\\'")}','${escapeHtml(o.nom).replace(/'/g,"\\'")}',${o.prix})" class="btn btn-xs btn-nego">💰 Offre</button>
+              <button onclick="openChatConversation('${o.grossistePhone}','${escapeHtml(o.grossiste).replace(/'/g,"\\'")}')" class="btn btn-xs btn-outline">💬</button>`}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function filtrerGrossiste(cat) {
+  _grossisteFiltreCategorie = cat;
+  afficherOffresGrosFiltrees();
+}
+
+function commanderLot(offreId, grossistePhone, grossisteNom, nom, prix, quantite, nbLots){
+  nbLots = parseInt(nbLots) || 1;
+  const myKey = dbKey(myPhone);
+  if (grossistePhone === myKey) return toast("C'est votre propre offre", 'var(--red)');
+  const total = prix * nbLots;
+  if (!confirm(`🛒 Commander ${nbLots} lot(s) de "${nom}"\n💰 ${total.toLocaleString()} CFA (${prix.toLocaleString()} CFA/lot)\n📦 ${quantite * nbLots} unités`)) return;
+
+  db.ref('users/'+myKey+'/solde').once('value', s => {
+    const solde = s.val()||0;
+    if (solde < total) return toast("Solde insuffisant", 'var(--red)');
+    db.ref('ika_grossiste/'+offreId+'/stock').once('value', snap => {
+      const stockActuel = snap.val();
+      if (stockActuel === null || stockActuel < nbLots) return toast("Stock insuffisant", 'var(--red)');
+      db.ref('ika_grossiste/'+offreId+'/stock').set(stockActuel - nbLots);
+      db.ref('users/'+myKey+'/solde').set(solde - total);
+      db.ref('users/'+myKey+'/solde_bloque').transaction(v => (v||0)+total);
+      db.ref('ika_grossiste_commandes').push({
+        offreId, produitNom: nom, prix, quantite, nbLots,
+        client: me.name, clientPhone: myKey,
+        grossiste: grossisteNom, grossistePhone: dbKey(grossistePhone),
+        statut: 'escrow', date: Date.now(),
+        client_confirme: false, grossiste_confirme: false,
+        livreur: null, livreurPhone: null
+      }).then(ref => {
+        envoyerNotification(dbKey(grossistePhone), { type:'commande_gros', titre:'📦 Nouvelle commande en gros !', message:`${me.name} a commandé ${nbLots} lot(s) de "${nom}" (${total.toLocaleString()} CFA).`, date:Date.now(), lu:false });
+        toast("✅ Commande passée !");
+        openGrossiste();
+      });
+    });
+  });
+}
+
+function proposerOffreGros(offreId, grossistePhone, grossisteNom, nom, prixActuel){
+  const offre = parseInt(prompt(`💰 Faire une offre pour "${nom}" (prix actuel : ${prixActuel.toLocaleString()} CFA/lot) :`));
+  if (!offre || offre < 100) return toast("Offre minimum 100 CFA", 'var(--red)');
+  if (offre >= prixActuel) return toast("L'offre doit être inférieure au prix affiché", 'var(--red)');
+  const myKey = dbKey(myPhone);
+  db.ref('ika_grossiste_offres').push({
+    offreId, produitNom: nom, offre, prixActuel,
+    client: me.name, clientPhone: myKey,
+    grossiste: grossisteNom, grossistePhone: dbKey(grossistePhone),
+    statut: 'en_attente',
+    date: Date.now()
+  }).then(ref => {
+    envoyerNotification(dbKey(grossistePhone), { type:'offre_grossiste', titre:'💰 Nouvelle offre sur un lot', message:`${me.name} propose ${offre.toLocaleString()} CFA/lot pour "${nom}" (au lieu de ${prixActuel.toLocaleString()} CFA).`, date:Date.now(), lu:false });
+    toast("✅ Offre envoyée ! Le grossiste va répondre.");
+    openGrossiste();
+  });
+}
+
+function voirOffresGrossiste(){
+  const myKey = dbKey(myPhone);
+  const div = document.getElementById('grossiste-list');
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  db.ref('ika_grossiste_offres').orderByChild('grossistePhone').equalTo(myKey).once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const o = c.val();
+        if (o.statut !== 'en_attente') return;
+        count++;
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid #f59e0b;">
+            <div style="flex:1;">
+              <div style="font-weight:700;">💰 Offre pour ${escapeHtml(o.produitNom)}</div>
+              <div class="num" style="color:var(--gold);">${o.offre.toLocaleString()} CFA/lot (prix normal ${o.prixActuel.toLocaleString()} CFA)</div>
+              <div style="color:var(--sub);font-size:10px;">👤 ${escapeHtml(o.client)}</div>
+              <div style="display:flex;gap:4px;margin-top:4px;">
+                <button onclick="repondreOffreGros('${c.key}',true)" class="btn btn-xs btn-primary">✅ Accepter</button>
+                <button onclick="repondreOffreGros('${c.key}',false)" class="btn btn-xs btn-danger">❌ Refuser</button>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+    if (count===0) div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;">Aucune offre en attente</p>';
+  });
+}
+
+function repondreOffreGros(id, accepte){
+  db.ref('ika_grossiste_offres/'+id).once('value', snap => {
+    const o = snap.val();
+    if (!o) return;
+    if (accepte){
+      const myKey = dbKey(myPhone);
+      db.ref('users/'+dbKey(o.clientPhone)+'/solde').once('value', s => {
+        const solde = s.val()||0;
+        if (solde < o.offre) return toast("L'acheteur n'a plus assez de solde", 'var(--red)');
+        db.ref('ika_grossiste/'+o.offreId+'/stock').once('value', snapStock => {
+          const stock = snapStock.val()||0;
+          if (stock < 1) return toast("Stock épuisé", 'var(--red)');
+          db.ref('ika_grossiste/'+o.offreId+'/stock').set(stock - 1);
+          db.ref('users/'+dbKey(o.clientPhone)+'/solde').set(solde - o.offre);
+          db.ref('users/'+dbKey(o.clientPhone)+'/solde_bloque').transaction(v => (v||0)+o.offre);
+          db.ref('ika_grossiste_commandes').push({
+            offreId: o.offreId, produitNom: o.produitNom, prix: o.offre, quantite:1, nbLots:1,
+            client: o.client, clientPhone: o.clientPhone,
+            grossiste: o.grossiste, grossistePhone: o.grossistePhone,
+            statut:'escrow', date:Date.now(), client_confirme:false, grossiste_confirme:false,
+            livreur:null, livreurPhone:null
+          }).then(ref => {
+            db.ref('ika_grossiste_offres/'+id).update({ statut:'accepte' });
+            envoyerNotification(o.clientPhone, { type:'offre_acceptee_gros', titre:'✅ Offre acceptée !', message:`${me.name} a accepté votre offre de ${o.offre.toLocaleString()} CFA/lot pour "${o.produitNom}".`, date:Date.now(), lu:false });
+            toast("✅ Offre acceptée, commande créée !");
+            openGrossiste();
+          });
+        });
+      });
+    } else {
+      db.ref('ika_grossiste_offres/'+id).update({ statut:'refuse' });
+      envoyerNotification(o.clientPhone, { type:'offre_refusee_gros', titre:'❌ Offre refusée', message:`${me.name} a refusé votre offre de ${o.offre.toLocaleString()} CFA.`, date:Date.now(), lu:false });
+      toast("❌ Offre refusée");
+      openGrossiste();
+    }
+  });
+}
+
+function voirMesOffresGros(){
+  const div = document.getElementById('grossiste-list');
+  if (!div) return;
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;font-size:12px;">⏳ Chargement...</p>';
+  const myKey = dbKey(myPhone);
+  db.ref('ika_grossiste').orderByChild('grossistePhone').equalTo(myKey).once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const o = c.val();
+        count++;
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid #8B5CF6;">
+            <div style="flex:1;">
+              <div style="font-weight:700;">📦 ${escapeHtml(o.nom)}</div>
+              <div class="num" style="color:var(--gold);">${o.prix.toLocaleString()} CFA / lot</div>
+              <div style="color:var(--sub);font-size:10px;">📦 ${o.quantiteParLot} unités · ${o.stock} lots</div>
+              <div style="font-size:10px;color:${o.statut==='disponible'?'var(--green)':'var(--sub)'};">${o.statut}</div>
+              ${o.statut==='disponible' ? `<button onclick="retirerOffreGros('${c.key}')" class="btn btn-xs btn-danger" style="margin-top:4px;">❌ Retirer</button>` : ''}
+            </div>
+          </div>`;
+      });
+    }
+    if (count===0) div.innerHTML = '<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">Aucune offre publiée</div>';
+  });
+}
+
+function retirerOffreGros(id){
+  if (!confirm("❌ Retirer cette offre ?")) return;
+  db.ref('ika_grossiste/'+id).update({ statut:'retire' }).then(() => { toast("✅ Offre retirée"); voirMesOffresGros(); });
+}
+
+// ============================================================
+// 13. VENDEUR AMBULANT — IKAMARCHÉ
+// ============================================================
+function renderVendeurAmbulantDash(){
+  document.getElementById('dashboard-pro').innerHTML += `
+    <div class="card" style="border:1px solid #8B5CF6;">
+      <h3 style="color:#8B5CF6;font-size:13px;">🚶 IKAMARCHÉ</h3>
+      <p style="font-size:9.5px;color:var(--sub);margin-top:-4px;">Vendez et livrez dans votre quartier — 10 minutes max</p>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;margin:6px 0;">
+        <button class="btn btn-xs btn-purple" onclick="voirDemandesAmbulant()">📢 Demandes</button>
+        <button class="btn btn-xs btn-info" onclick="voirMesLivraisonsAmbulant()">📋 Mes livraisons</button>
+        <button class="btn btn-xs btn-gold" onclick="publierOffreAmbulant()">📦 Publier une offre</button>
+      </div>
+      <div id="ambulant-demandes" style="max-height:300px;overflow-y:auto;">
+        <p style="color:var(--sub);text-align:center;font-size:11px;padding:10px;">Chargement...</p>
+      </div>
+    </div>
+  `;
+  setTimeout(() => voirDemandesAmbulant(), 300);
+}
+
+function voirDemandesAmbulant(){
+  const div = document.getElementById('ambulant-demandes');
+  if (!div) return;
+  const monQuartier = me.quartier || 'Tous';
+  
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;">⏳ Chargement...</p>';
+  
+  db.ref('demandes').orderByChild('statut').equalTo('en_attente').once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    
+    if (snap.exists()){
+      snap.forEach(c => {
+        const d = c.val();
+        if (monQuartier !== 'Tous' && d.quartier !== monQuartier) return;
+        count++;
+        const date = new Date(d.date).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+        
+        div.innerHTML += `
+          <div class="course-item" style="border-left:3px solid #8B5CF6;">
+            <div style="flex:1;">
+              <div style="font-weight:700;">📦 ${escapeHtml(d.produit)}</div>
+              <div style="color:var(--sub);font-size:10px;">
+                ${d.quantite || ''} · ${d.prix ? d.prix.toLocaleString()+' CFA' : ''} 
+                · 📍 ${escapeHtml(d.quartier)}
+                · 🕐 ${date}
+              </div>
+              ${d.desc ? `<div style="color:var(--sub);font-size:9px;">${escapeHtml(d.desc)}</div>` : ''}
+              <div style="display:flex;gap:4px;margin-top:4px;">
+                <button onclick="prendreDemandeAmbulant('${c.key}','${d.clientPhone}','${escapeHtml(d.produit).replace(/'/g,"\\'")}')" class="btn btn-xs btn-purple">🚶 Prendre</button>
+                <button onclick="openChatConversation('${d.clientPhone}','Client')" class="btn btn-xs btn-outline">💬</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    
+    if (count===0) {
+      div.innerHTML = `
+        <div style="text-align:center;padding:26px;color:var(--sub);">
+          <div style="font-size:30px;">🕊️</div>
+          <p style="font-size:12px;">Aucune demande dans votre quartier</p>
+          <p style="font-size:10px;color:var(--sub);">Revenez dans 5 minutes</p>
+        </div>
+      `;
+    }
+  });
+}
+
+function prendreDemandeAmbulant(id, clientPhone, produit){
+  if (!confirm(`🚶 Prendre cette demande : "${produit}" ?`)) return;
+  
+  const myKey = dbKey(myPhone);
+  
+  db.ref('demandes/'+id).update({
+    statut: 'en_cours',
+    ambulant: me.name,
+    ambulantPhone: myKey,
+    datePrise: Date.now()
+  }).then(() => {
+    envoyerNotification(clientPhone, {
+      type:'demande_prise',
+      titre:'🚶 Un ambulant arrive !',
+      message:`${me.name} a pris votre demande "${produit}". Il arrive dans quelques minutes.`,
+      date:Date.now(),
+      lu:false
+    });
+    
+    // Chrono de 10 minutes
+    setTimeout(() => {
+      db.ref('demandes/'+id).once('value', snap => {
+        const d = snap.val();
+        if (d && d.statut === 'en_cours') {
+          if (confirm(`🕐 10 minutes écoulées ! Avez-vous livré "${produit}" ?`)) {
+            confirmerLivraisonAmbulant(id, clientPhone, d.prix || 0);
+          } else {
+            db.ref('demandes/'+id).update({ statut: 'en_attente', ambulant: null, ambulantPhone: null });
+            envoyerNotification(clientPhone, { type:'demande_annulee', titre:'⏳ Demande annulée', message:`L'ambulant n'a pas pu livrer dans les 10 minutes.`, date:Date.now(), lu:false });
+            toast("⏳ 10 minutes dépassées");
+          }
+        }
+      });
+    }, 10 * 60 * 1000);
+    
+    toast("✅ Demande prise ! Vous avez 10 minutes.");
+    voirDemandesAmbulant();
+  });
+}
+
+function confirmerLivraisonAmbulant(id, clientPhone, montant){
+  if (!confirm(`✅ Confirmer la livraison ? Le client va payer ${montant.toLocaleString()} CFA.`)) return;
+  
+  const myKey = dbKey(myPhone);
+  const commission = Math.round(montant * 0.10); // 10% de commission
+  const revenu = montant - commission;
+  
+  db.ref('demandes/'+id).update({
+    statut: 'termine',
+    dateLivraison: Date.now()
+  }).then(() => {
+    db.ref('users/'+myKey+'/solde').transaction(v => (v||0)+revenu);
+    db.ref('users/'+dbKey(ADMIN)+'/solde').transaction(v => (v||0)+commission);
+    
+    logHistory(myKey, '🚶 LIVRAISON AMBULANT', revenu);
+    logHistory(dbKey(ADMIN), '💵 COMMISSION AMBULANT', commission);
+    
+    envoyerNotification(clientPhone, {
+      type:'livraison_terminee',
+      titre:'✅ Livré !',
+      message:`${me.name} a livré votre commande.`,
+      date:Date.now(),
+      lu:false
+    });
+    
+    toast(`✅ Livraison confirmée ! +${revenu.toLocaleString()} CFA (commission ${commission} CFA)`);
+    voirDemandesAmbulant();
+  });
+}
+
+function voirMesLivraisonsAmbulant(){
+  const div = document.getElementById('grossiste-list');
+  if (!div) return;
+  div.innerHTML = '<p style="text-align:center;color:var(--sub);padding:20px;">⏳ Chargement...</p>';
+  
+  const myKey = dbKey(myPhone);
+  db.ref('demandes').orderByChild('ambulantPhone').equalTo(myKey).once('value', snap => {
+    div.innerHTML = '';
+    let count = 0;
+    if (snap.exists()){
+      snap.forEach(c => {
+        const d = c.val();
+        if (d.statut === 'termine' || d.statut === 'en_cours') {
+          count++;
+          div.innerHTML += `
+            <div class="course-item" style="border-left:3px solid ${d.statut==='termine'?'var(--green)':'var(--info)'};">
+              <div style="flex:1;">
+                <div style="font-weight:700;">${escapeHtml(d.produit)}</div>
+                <div style="color:var(--sub);font-size:10px;">📍 ${escapeHtml(d.quartier)} · ${d.prix ? d.prix.toLocaleString()+' CFA' : ''}</div>
+                <div style="font-size:10px;color:${d.statut==='termine'?'var(--green)':'var(--info)'};">${statutLabel(d.statut)}</div>
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+    if (count===0) div.innerHTML = '<p style="color:var(--sub);text-align:center;padding:20px;">Aucune livraison</p>';
+  });
+}
+
+function publierOffreAmbulant(){
+  if (me.role !== 'VendeurAmbulant' && !isAdminPhone(myPhone)) return toast("Réservé aux ambulants", 'var(--red)');
+  
+  openModal("📦 PUBLIER UNE OFFRE AMBULANT");
+  const catOptions = CATEGORIES_GROSSISTE.map(c => `<option value="${c}">${c}</option>`).join('');
+  
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card card-purple">
+      <p style="font-size:11px;color:var(--sub);">Publiez ce que vous vendez et où vous êtes</p>
+      <input type="text" id="amb-produit" placeholder="Produit *">
+      <select id="amb-categorie">${catOptions}</select>
+      <input type="number" id="amb-prix" placeholder="Prix (CFA) *">
+      <input type="number" id="amb-quantite" placeholder="Quantité disponible" value="10">
+      <select id="amb-quartier">
+        ${QUARTIERS.map(q => `<option value="${q}" ${q === me.quartier ? 'selected' : ''}>${q}</option>`).join('')}
+      </select>
+      <textarea id="amb-desc" placeholder="Description..."></textarea>
+      <input type="password" id="amb-pin" placeholder="Votre PIN *">
+      <button onclick="soumettreOffreAmbulant()" class="btn btn-purple" style="margin-top:6px;">📦 PUBLIER</button>
+    </div>
+  `;
+}
+
+function soumettreOffreAmbulant(){
+  const produit = document.getElementById('amb-produit').value.trim();
+  const categorie = document.getElementById('amb-categorie').value;
+  const prix = parseInt(document.getElementById('amb-prix').value);
+  const quantite = parseInt(document.getElementById('amb-quantite').value) || 10;
+  const quartier = document.getElementById('amb-quartier').value;
+  const desc = document.getElementById('amb-desc').value.trim();
+  const pin = document.getElementById('amb-pin').value;
+  
+  if (!produit || !prix || prix < 10) return toast("Remplissez tous les champs", 'var(--red)');
+  if (!checkPin(pin)) return toast("PIN incorrect", 'var(--red)');
+  
+  const myKey = dbKey(myPhone);
+  db.ref('offres_ambulant').push({
+    produit, categorie, prix, quantite, quartier, desc,
+    vendeur: me.name, vendeurPhone: myKey,
+    statut: 'disponible',
+    date: Date.now()
+  }).then(() => {
+    toast("✅ Offre publiée !");
+    closeModal();
+  });
+}
+
+// ============================================================
+// 14. TABLEAU DE BORD AGENT
+// ============================================================
+function renderAgentDash(){
+  const isAdmin = isAdminPhone(myPhone);
+  const myKey = dbKey(myPhone);
+  db.ref('agents/'+myKey).once('value', aSnap => {
+    const agent = aSnap.val() || { commissions:0, transactions:0 };
+    const adminSection = isAdmin ? `
+      <div style="border-bottom:1px solid var(--border);margin-bottom:10px;padding-bottom:10px;">
+        <h4 style="color:var(--red);margin:0 0 7px;font-size:12px;">🛡️ PANNEAU ADMIN</h4>
+        <div class="grid-2">
+          <button class="btn btn-sm btn-info" onclick="openRecrutementAgent()">🏪 Recruter agent</button>
+          <button class="btn btn-sm btn-danger" onclick="openAdminPanel()">🛡️ Modération</button>
+        </div>
+      </div>` : '';
+    document.getElementById('dashboard-pro').innerHTML = `
+      <div class="card card-gold">
+        <h3 style="color:var(--gold);margin:0 0 10px;font-size:14px;">🏦 ESPACE AGENT</h3>
+        <div class="frais-grid">
+          <div class="frais-grid-item" style="border-right:1px solid var(--border);"><div class="montant">100–500 CFA</div><div class="frais">1 F</div><div class="label">Commission</div></div>
+          <div class="frais-grid-item" style="border-right:1px solid var(--border);"><div class="montant">501–50k CFA</div><div class="frais">1%</div><div class="label">Commission</div></div>
+          <div class="frais-grid-item"><div class="montant">&gt; 50k CFA</div><div class="frais">0.5%</div><div class="label">Commission</div></div>
+        </div>
+        <div class="grid-2" style="margin-bottom:10px;">
+          <div class="admin-stat"><div class="val num">${(agent.transactions||0)}</div><div class="lbl">Transactions</div></div>
+          <div class="admin-stat"><div class="val num">${(agent.commissions||0).toLocaleString()} CFA</div><div class="lbl">Commissions gagnées</div></div>
+        </div>
+        ${adminSection}
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <input type="tel" id="agent-target" placeholder="Numéro client" style="flex:1;">
+          <input type="number" id="agent-amt" placeholder="Montant" style="flex:1;">
+        </div>
+        <div class="grid-2">
+          <button class="btn btn-primary" onclick="agentDepot()">📥 DÉPÔT (à distance)</button>
+          <button class="btn btn-gold" onclick="agentRetraitGuichet()">📤 RETRAIT (guichet)</button>
+        </div>
+        <div style="margin-top:8px;padding:7px;background:rgba(24,185,85,.08);border-radius:10px;text-align:center;font-size:9.5px;color:var(--sub);">
+          ✨ 0% commission client sur les dépôts · +50 CFA bonus par dépôt confirmé
+        </div>
+      </div>`;
+  });
+}
+
+function openRecrutementAgent(){
+  if (!isAdminPhone(myPhone)) return toast("Accès réservé", 'var(--red)');
+  openModal("🏪 RECRUTER UN AGENT");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card card-gold">
+      <p style="color:var(--sub);font-size:12px;">Recrutez un agent de confiance dans sa zone.</p>
+      <input type="tel" id="agent-tel" placeholder="Numéro de téléphone (compte existant) *">
+      <input type="text" id="agent-zone" placeholder="Zone (ex: Bamako - Hamdallaye) *">
+      <button class="btn btn-gold" onclick="validerRecrutementAgent()" style="margin-top:6px;">🏪 RECRUTER</button>
+    </div>`;
+}
+
+function validerRecrutementAgent(){
+  const telRaw = document.getElementById('agent-tel').value.trim();
+  const zone = document.getElementById('agent-zone').value.trim();
+  if (!telRaw || !zone) return toast("Remplissez tous les champs", 'var(--red)');
+  const tel = normalizePhone(telRaw);
+  db.ref('users/'+dbKey(tel)).once('value', s => {
+    if (!s.exists()) return toast("❌ Cet utilisateur doit d'abord créer un compte", 'var(--red)');
+    const code = Math.random().toString(36).substring(2,8).toUpperCase();
+    db.ref('agents/'+dbKey(tel)).set({ nom: s.val().name, telephone: tel, zone, code_agent: code, date_recrutement: Date.now(), statut:'actif', commissions:0, transactions:0 })
+      .then(() => {
+        db.ref('users/'+dbKey(tel)+'/role').set('Agent');
+        envoyerNotification(dbKey(tel), { type:'agent_recrute', titre:'🏪 Bienvenue Agent IKAPAY !', message:`Zone : ${zone}. Code : ${code}`, date:Date.now(), lu:false });
+        toast(`✅ Agent ${s.val().name} recruté !`);
+        closeModal();
+      });
+  });
+}
+
+// ============================================================
+// 15. TABLEAU DE BORD CHAUFFEUR
+// ============================================================
+function renderChauffeurDash(){
+  document.getElementById('dashboard-pro').innerHTML += `
+    <div class="card card-danger"><h3 style="color:var(--red);font-size:13px;">🚕 COURSES DISPONIBLES</h3><div id="taxi-list-chauffeur"><p style="color:var(--sub);text-align:center;font-size:12px;">Chargement...</p></div></div>
+    <div class="card" style="border:1px solid rgba(224,138,0,.5);"><h3 style="color:#ff9a3d;font-size:13px;">📦 LIVRAISONS DISPONIBLES</h3><div id="livreur-list-chauffeur"><p style="color:var(--sub);text-align:center;font-size:12px;">Chargement...</p></div></div>
+    <div class="card card-accent"><h3 style="color:var(--green);font-size:13px;">💵 RETRAITS CASH DISPONIBLES</h3><p style="font-size:9.5px;color:var(--sub);margin-top:-4px;">Livrez du cash en chemin, comme une course</p><div id="retrait-list-chauffeur"><p style="color:var(--sub);text-align:center;font-size:12px;">Chargement...</p></div></div>
+  `;
+  const myKey = dbKey(myPhone);
+
+  db.ref('taxi_requests').orderByChild('statut').equalTo('en_attente').on('value', s => {
+    const div = document.getElementById('taxi-list-chauffeur');
+    if (!div) return;
+    div.innerHTML = '';
+    let count = 0;
+    s.forEach(c => {
+      const d = c.val();
+      if (d.clientPhone === myKey) return;
+      count++;
+      const v = VEHICULES[d.vehicule]||VEHICULES.voiture;
+      const net = d.prix - Math.round(d.prix*COMMISSION);
+      div.innerHTML += `
+        <div class="course-item" style="border-left:3px solid var(--red);">
+          <div style="flex:1;">
+            <b>${v.emoji} ${escapeHtml(d.client)}</b>
+            <div style="color:var(--sub);font-size:11px;">📍 ${escapeHtml(d.depart)} → ${escapeHtml(d.destination)}</div>
+            ${getDelaiBadge(DELAI.taxi)}
+            <div class="num" style="color:var(--gold);font-weight:700;margin-top:2px;">${d.prix.toLocaleString()} CFA <span style="color:var(--sub);font-size:10px;font-weight:400;">(${net.toLocaleString()} net)</span></div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              <button onclick="accepterCourse('taxi_requests','${c.key}','${d.clientPhone}','${escapeHtml(d.client).replace(/'/g,"\\'")}',${d.prix},'🚕 EN ROUTE ! Je viens vous chercher.')" class="btn btn-xs btn-danger">🚕 Prendre</button>
+              <button onclick="proposerPrix('taxi_requests','${c.key}','${d.clientPhone}','${escapeHtml(d.client).replace(/'/g,"\\'")}',${d.prix})" class="btn btn-xs btn-nego">💰 Proposer</button>
+            </div>
+          </div>
+        </div>`;
+    });
+    if (count===0) div.innerHTML = '<p style="color:var(--sub);text-align:center;font-size:12px;">Aucune course en attente</p>';
+  });
+
+  db.ref('livraisons_colis').orderByChild('statut').equalTo('en_attente').on('value', s => {
+    const div = document.getElementById('livreur-list-chauffeur');
+    if (!div) return;
+    div.innerHTML = '';
+    let count = 0;
+    s.forEach(c => {
+      const l = c.val();
+      if (l.clientPhone === myKey) return;
+      count++;
+      const net = l.montant - Math.round(l.montant*COMMISSION);
+      div.innerHTML += `
+        <div class="course-item" style="border-left:3px solid #ff9a3d;">
+          <div style="flex:1;">
+            <b>📦 ${escapeHtml(l.titre)}</b>
+            <div style="color:var(--sub);font-size:11px;">📍 ${escapeHtml(l.depart)} → ${escapeHtml(l.destination)}</div>
+            ${getDelaiBadge(DELAI.livreur)}
+            <div class="num" style="color:var(--gold);font-weight:700;margin-top:2px;">${l.montant.toLocaleString()} CFA <span style="color:var(--sub);font-size:10px;font-weight:400;">(${net.toLocaleString()} net)</span></div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              <button onclick="accepterCourse('livraisons_colis','${c.key}','${l.clientPhone}','${escapeHtml(l.expediteur).replace(/'/g,"\\'")}',${l.montant},'📦 EN ROUTE ! Je prends en charge votre colis.')" class="btn btn-xs" style="background:linear-gradient(135deg,#ff9a3d,#e06a00);">📦 Prendre</button>
+              <button onclick="proposerPrix('livraisons_colis','${c.key}','${l.clientPhone}','${escapeHtml(l.expediteur).replace(/'/g,"\\'")}',${l.montant})" class="btn btn-xs btn-nego">💰 Proposer</button>
+            </div>
+          </div>
+        </div>`;
+    });
+    if (count===0) div.innerHTML = '<p style="color:var(--sub);text-align:center;font-size:12px;">Aucune livraison en attente</p>';
+  });
+
+  db.ref('ika_retraits').orderByChild('statut').equalTo('en_attente').on('value', s => {
+    const div = document.getElementById('retrait-list-chauffeur');
+    if (!div) return;
+    div.innerHTML = '';
+    let count = 0;
+    s.forEach(c => {
+      const d = c.val();
+      if (d.clientPhone === myKey) return;
+      count++;
+      const frais = getFraisRetrait(d);
+      div.innerHTML += `
+        <div class="course-item" style="border-left:3px solid var(--green);">
+          <div style="flex:1;">
+            <b>💵 ${escapeHtml(d.client)}</b>
+            <div style="color:var(--sub);font-size:11px;">📍 ${escapeHtml(d.adresse)}</div>
+            <div class="num" style="color:var(--gold);font-weight:700;margin-top:2px;">${d.montant.toLocaleString()} CFA <span style="color:var(--sub);font-size:10px;font-weight:400;">(commission ${frais.toLocaleString()} CFA)</span></div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              <button onclick="accepterRetrait('${c.key}','${d.clientPhone}','${escapeHtml(d.client).replace(/'/g,"\\'")}',${d.montant})" class="btn btn-xs btn-primary">💵 Prendre</button>
+              <button onclick="proposerFraisRetrait('${c.key}')" class="btn btn-xs btn-nego">💰 Proposer</button>
+            </div>
+          </div>
+        </div>`;
+    });
+    if (count===0) div.innerHTML = '<p style="color:var(--sub);text-align:center;font-size:12px;">Aucun retrait en attente</p>';
+  });
+
+  db.ref('taxi_requests').orderByChild('chauffeurPhone').equalTo(myKey).on('value', s => {
+    s.forEach(c => { const d = c.val(); if (d.statut==='en_cours' && !d.chauffeur_confirme) afficherActionChauffeur('taxi_requests', c.key, d); });
+  });
+  db.ref('livraisons_colis').orderByChild('livreurPhone').equalTo(myKey).on('value', s => {
+    s.forEach(c => { const d = c.val(); if (d.statut==='en_cours' && !d.livreur_confirme) afficherActionChauffeur('livraisons_colis', c.key, d); });
+  });
+}
+
+function afficherActionChauffeur(path, id, d){
+  const containerId = path==='taxi_requests' ? 'taxi-list-chauffeur' : 'livreur-list-chauffeur';
+  const div = document.getElementById(containerId);
+  if (!div || document.getElementById('actif-'+id)) return;
+  const label = path==='taxi_requests' ? `${escapeHtml(d.depart)} → ${escapeHtml(d.destination)}` : `📦 ${escapeHtml(d.titre)}`;
+  const row = document.createElement('div');
+  row.id = 'actif-'+id;
+  row.className = 'course-item';
+  row.style.borderLeft = '3px solid var(--info)';
+  row.innerHTML = `
+    <div style="flex:1;">
+      <b>🚗 En cours : ${label}</b>
+      <div style="color:var(--sub);font-size:10px;">Client : ${escapeHtml(d.client||d.expediteur||'')}</div>
+      <button onclick="chauffeurConfirme('${path}','${id}','${d.clientPhone}')" class="btn btn-xs btn-primary" style="margin-top:4px;">✅ J'ai terminé</button>
+    </div>`;
+  div.prepend(row);
+}
+
+// ============================================================
+// 16. ADMIN PANEL
+// ============================================================
+function openAdminPanel(){
+  if (!isAdminPhone(myPhone)) return;
+  openModal("🛡️ MODÉRATION ADMIN");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="grid-2" style="margin-bottom:10px;">
+      <div class="admin-stat"><div class="val" id="stat-users">...</div><div class="lbl">Utilisateurs</div></div>
+      <div class="admin-stat"><div class="val" id="stat-litiges">...</div><div class="lbl">Litiges ouverts</div></div>
+    </div>
+    <div class="card card-gold"><h4 style="color:var(--gold);font-size:12px;">👥 UTILISATEURS</h4><div id="admin-users-list" style="max-height:220px;overflow-y:auto;"></div></div>
+    <div class="card card-danger"><h4 style="color:var(--red);font-size:12px;">⚠️ LITIGES</h4><div id="admin-litiges-list" style="max-height:200px;overflow-y:auto;"></div></div>
+    <div class="card"><h4 style="color:var(--gold);font-size:12px;">🏪 AGENTS</h4><div id="admin-agents-list" style="max-height:150px;overflow-y:auto;"></div><button class="btn btn-info" onclick="openRecrutementAgent()" style="margin-top:6px;">🏪 Recruter un agent</button></div>
+    <div class="card"><h4 style="color:var(--red);font-size:12px;">🔧 GÉRER UTILISATEUR</h4><input type="tel" id="ban-tel" placeholder="Numéro (+223...)"><div class="grid-2" style="margin-top:6px;"><button class="btn btn-sm btn-outline" onclick="adminResetPin()">🔑 Reset PIN</button><button class="btn btn-sm btn-danger" onclick="adminDeleteUser()">🚫 Supprimer</button></div></div>
+    <div class="card"><h4 style="color:var(--green);font-size:12px;">💸 INJECTION / TRANSFERT</h4><input type="tel" id="adm-to" placeholder="Numéro destinataire"><input type="number" id="adm-amt" placeholder="Montant CFA"><div class="grid-2" style="margin-top:6px;"><button class="btn btn-sm btn-primary" onclick="injectSystemFunds()">💎 Injecter</button><button class="btn btn-sm btn-info" onclick="adminTransfer()">➡️ Transférer</button></div></div>
+  `;
+  db.ref('users').once('value', s => {
+    document.getElementById('stat-users').innerText = s.numChildren();
+    const list = document.getElementById('admin-users-list');
+    list.innerHTML = '';
+    s.forEach(c => {
+      const u = c.val();
+      list.innerHTML += `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;">
+          <div><div style="font-weight:700;">${escapeHtml(u.name)||'—'}</div><div style="font-size:9px;color:var(--sub);">${escapeHtml(u.phone)||c.key} · ${escapeHtml(u.role)||'?'}</div><div class="num" style="color:var(--green);font-weight:700;">${(Number(u.solde||0)).toLocaleString('fr-FR')} CFA</div></div>
+          <button class="btn btn-xs btn-info" onclick="openChatConversation('${u.phone||('+223'+c.key)}','${escapeHtml(u.name||'').replace(/'/g,"\\'")}');">💬</button>
+        </div>`;
+    });
+  });
+  db.ref('litiges').limitToLast(15).once('value', s => {
+    document.getElementById('stat-litiges').innerText = s.numChildren();
+    const list = document.getElementById('admin-litiges-list');
+    if (!s.exists()){ list.innerHTML = '<p style="color:var(--sub);text-align:center;font-size:11px;">Aucun litige.</p>'; return; }
+    list.innerHTML = '';
+    s.forEach(c => {
+      const l = c.val();
+      list.innerHTML += `
+        <div style="background:var(--card2);border-radius:10px;padding:8px;margin-bottom:5px;">
+          <div class="flex-between"><b style="color:var(--red);font-size:12px;">${escapeHtml(l.sujet)}</b><button class="del-btn" onclick="db.ref('litiges/'+'${c.key}').remove().then(()=>toast('Archivé'))">✓</button></div>
+          <div style="font-size:10px;color:var(--sub);">${escapeHtml(l.name)} · ${escapeHtml(l.phone)}</div>
+          <div style="font-size:11px;margin-top:2px;">${escapeHtml(l.desc)}</div>
+          <button class="btn btn-xs btn-info" onclick="openChatConversation('${l.phone}','${escapeHtml(l.name||'').replace(/'/g,"\\'")}');" style="margin-top:4px;">💬 Répondre</button>
+        </div>`;
+    });
+  });
+  db.ref('agents').once('value', s => {
+    const list = document.getElementById('admin-agents-list');
+    if (!s.exists()){ list.innerHTML = '<p style="color:var(--sub);text-align:center;font-size:11px;">Aucun agent.</p>'; return; }
+    list.innerHTML = '';
+    s.forEach(c => {
+      const a = c.val();
+      list.innerHTML += `
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px;">
+          <div><div style="font-weight:700;">${escapeHtml(a.nom)}</div><div style="font-size:9px;color:var(--sub);">${escapeHtml(a.zone)} · ${a.transactions||0} trans.</div></div>
+          <div class="num" style="color:var(--green);">${(a.commissions||0).toLocaleString()} CFA</div>
+        </div>`;
+    });
+  });
+}
+
+function adminResetPin(){
+  const tel = document.getElementById('ban-tel').value.trim();
+  const newPin = prompt("Nouveau PIN :");
+  if (tel && newPin) db.ref('users/'+dbKey(normalizePhone(tel))+'/pin').set(newPin).then(() => toast("🔑 PIN réinitialisé"));
+}
+function adminDeleteUser(){
+  const tel = document.getElementById('ban-tel').value.trim();
+  if (!tel) return;
+  if (!confirm("🚫 Supprimer cet utilisateur ?")) return;
+  const key = dbKey(normalizePhone(tel));
+  db.ref('users/'+key).remove();
+  db.ref('user_history/'+key).remove();
+  toast("Supprimé");
+}
+function injectSystemFunds(){
+  if (!isAdminPhone(myPhone)) return;
+  const targetRaw = document.getElementById('adm-to').value.trim();
+  const amt = parseInt(document.getElementById('adm-amt').value);
+  if (!amt || amt <= 0) return toast("Montant invalide", 'var(--red)');
+  const targetKey = targetRaw ? dbKey(normalizePhone(targetRaw)) : dbKey(myPhone);
+  db.ref('users/'+targetKey).once('value', s => {
+    if (!s.exists()) return toast("Numéro introuvable", 'var(--red)');
+    db.ref('users/'+targetKey+'/solde').transaction(v => (v||0)+amt);
+    logHistory(targetKey, 'INJECTION ADMIN', amt);
+    toast("💎 "+amt.toLocaleString()+" CFA injectés !");
+  });
+}
+function adminTransfer(){
+  const toRaw = document.getElementById('adm-to').value.trim();
+  const amt = parseInt(document.getElementById('adm-amt').value);
+  if (!toRaw || !amt || amt <= 0) return toast("Champs incomplets", 'var(--red)');
+  const toKey = dbKey(normalizePhone(toRaw));
+  db.ref('users/'+toKey).once('value', s => {
+    if (!s.exists()) return toast("Numéro introuvable", 'var(--red)');
+    db.ref('users/'+toKey+'/solde').transaction(v => (v||0)+amt);
+    db.ref('users/'+dbKey(myPhone)+'/solde').transaction(v => (v||0)-amt);
+    logHistory(toKey, 'TRANSFERT ADMIN', amt);
+    logHistory(dbKey(myPhone), 'TRANSFERT → '+s.val().name, -amt);
+    toast("✅ "+amt.toLocaleString()+" CFA → "+s.val().name);
+  });
+}
+
+// ============================================================
+// 17. HISTORIQUE
+// ============================================================
+function openHistory(){
+  document.getElementById('section-home').classList.add('hidden');
+  openModal("📋 HISTORIQUE");
+  const myKey = dbKey(myPhone);
+  db.ref('user_history/'+myKey).limitToLast(40).once('value', s => {
+    const content = document.getElementById('modal-content');
+    if (!s.exists()){ content.innerHTML = '<div style="text-align:center;color:var(--sub);padding:30px;">📋 Aucune transaction.</div>'; return; }
+    const items = [];
+    s.forEach(c => items.unshift({id:c.key, ...c.val()}));
+    content.innerHTML = `
+      <div class="flex-between" style="margin-bottom:8px;">
+        <span style="font-size:11px;color:var(--sub);">${items.length} transactions</span>
+        <button onclick="effacerHistorique('${myKey}')" class="btn btn-sm btn-danger">🗑️ Effacer</button>
+      </div>
+      ${items.map(h => {
+        const amt = Number(h.amt||0);
+        const isRembours = h.type && h.type.includes('REMBOURSEMENT');
+        const color = amt>0 ? 'var(--green)' : 'var(--red)';
+        return `<div class="historique-item ${isRembours?'rembourse':''}">
+          <div style="font-weight:700;">${escapeHtml(h.type)||'Transaction'}</div>
+          <div style="font-size:9px;color:var(--sub);">${escapeHtml(h.date)||''}</div>
+          <div class="num" style="font-weight:700;color:${color};">${amt>0?'+':''}${amt.toLocaleString('fr-FR')} CFA</div>
+        </div>`;
+      }).join('')}
+    `;
+  });
+}
+function effacerHistorique(key){
+  if (!confirm("⚠️ Supprimer tout l'historique ?")) return;
+  db.ref('user_history/'+key).remove().then(() => toast("🗑️ Historique effacé"));
+}
+
+// ============================================================
+// 18. PROFIL
+// ============================================================
+function openProfile(){
+  document.getElementById('section-home').classList.add('hidden');
+  openModal("👤 MON PROFIL");
+  db.ref('users/'+dbKey(myPhone)).once('value', s => {
+    const u = s.val() || me;
+    const avatarHtml = u.avatar ? `<img src="${u.avatar}" class="profile-avatar-img">` :
+      `<div style="width:76px;height:76px;border-radius:50%;background:${getAvatarColor(u.name)};display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:#fff;border:3px solid var(--green);">${getInitials(u.name)}</div>`;
+    document.getElementById('modal-content').innerHTML = `
+      <div class="card text-center">
+        <div class="profile-avatar-wrap">${avatarHtml}<div class="profile-avatar-edit" onclick="changerAvatar()">📷</div></div>
+        <h2 style="font-size:18px;color:var(--green);">${escapeHtml(u.name)}</h2>
+        <p style="color:var(--sub);font-size:12px;">${escapeHtml(u.phone)}</p>
+        <span class="badge" style="color:var(--gold);border:1px solid var(--gold);">${escapeHtml(u.role)}</span>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--gold);font-size:12px;">⚙️ MODIFIER</h4>
+        <input type="text" id="edit-name" value="${escapeHtml(u.name)}" placeholder="Nouveau nom">
+        <input type="password" id="old-pin" placeholder="PIN actuel">
+        <input type="password" id="new-pin" placeholder="Nouveau PIN (optionnel)">
+        <button onclick="saveProfile()" class="btn btn-primary" style="margin-top:6px;">💾 SAUVEGARDER</button>
+      </div>
+      <button onclick="effacerHistorique('${dbKey(myPhone)}')" class="btn btn-outline" style="margin-top:6px;">🗑️ Effacer mon historique</button>
+      ${isAdminPhone(myPhone) ? `<button onclick="openAdminPanel()" class="btn btn-danger" style="margin-top:6px;">🛡️ Panneau Admin</button>` : ''}
+    `;
+  });
+}
+function changerAvatar(){
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*';
+  input.onchange = function(){
+    const f = this.files[0]; if (!f) return;
+    const r = new FileReader();
+    r.onload = e => { db.ref('users/'+dbKey(myPhone)+'/avatar').set(e.target.result).then(() => { toast("✅ Photo mise à jour"); openProfile(); }); };
+    r.readAsDataURL(f);
+  };
+  input.click();
+}
+function saveProfile(){
+  const newName = document.getElementById('edit-name').value.trim();
+  const oldPin = document.getElementById('old-pin').value;
+  const newPin = document.getElementById('new-pin').value;
+  if (!newName) return toast("Nom vide", 'var(--red)');
+  if (!checkPin(oldPin)) return toast("PIN incorrect", 'var(--red)');
+  const updates = { name:newName };
+  if (newPin) updates.pin = newPin;
+  db.ref('users/'+dbKey(myPhone)).update(updates).then(() => {
+    me.name = newName; if (newPin) me.pin = newPin;
+    document.getElementById('disp-name').innerText = me.name;
+    toast("✅ Profil mis à jour");
+    closeModal();
+  });
+}
+
+// ============================================================
+// 19. QR & LITIGE
+// ============================================================
+function showQR(){
+  openModal("📱 MON QR CODE");
+  document.getElementById('modal-content').innerHTML = `
+    <div style="text-align:center;padding:24px 10px;">
+      <div style="background:#fff;width:170px;height:170px;margin:0 auto 16px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;">
+        <div style="font-size:34px;">📱</div>
+        <div style="color:#000;font-weight:900;font-size:11px;">${escapeHtml(myPhone)}</div>
+      </div>
+      <div class="card num" style="font-size:18px;font-weight:700;color:var(--green);text-align:center;">${escapeHtml(myPhone)}</div>
+      <button onclick="navigator.clipboard && navigator.clipboard.writeText('${myPhone}').then(()=>toast('Copié !'))" class="btn btn-outline" style="margin-top:6px;">📋 Copier</button>
+    </div>`;
+}
+function openLitige(){
+  openModal("⚠️ SIGNALER UN LITIGE");
+  document.getElementById('modal-content').innerHTML = `
+    <div class="card">
+      <p style="color:var(--sub);font-size:12px;margin-top:0;">L'admin sera notifié immédiatement.</p>
+      <input type="text" id="lit-sujet" placeholder="Sujet">
+      <textarea id="lit-desc" placeholder="Description..."></textarea>
+      <input type="number" id="lit-amt" placeholder="Montant concerné (optionnel)">
+      <button onclick="sendLitige()" class="btn btn-danger" style="margin-top:6px;">📨 ENVOYER</button>
+    </div>`;
+}
+function sendLitige(){
+  const sujet = document.getElementById('lit-sujet').value.trim();
+  const desc = document.getElementById('lit-desc').value.trim();
+  if (!sujet || !desc) return toast("Remplis sujet et description", 'var(--red)');
+  const amt = document.getElementById('lit-amt').value || 0;
+  db.ref('litiges').push({ phone: myPhone, name: me.name, sujet, desc, amt: Number(amt), date: Date.now() });
+  closeModal();
+  toast("📨 Signalement envoyé !");
+}
+
+// ============================================================
+// 20. NOTIFICATIONS
+// ============================================================
+function startNotifications(){
+  const myKey = dbKey(myPhone);
+  db.ref('notifications/'+myKey).orderByChild('lu').equalTo(false).on('value', s => {
+    const badge = document.getElementById('notif-badge');
+    if (!badge) return;
+    const count = s.exists() ? s.numChildren() : 0;
+    badge.innerText = count;
+    badge.classList.toggle('hidden', count===0);
+    if (s.exists()){
+      s.forEach(c => {
+        const n = c.val();
+        if (!n.lu && !n.popup_shown){
+          db.ref('notifications/'+myKey+'/'+c.key+'/popup_shown').set(true);
+          toast(`🔔 ${n.message}`);
+        }
+      });
+    }
+  });
+}
+
+function openNotifications(){
+  openModal("🔔 Notifications");
+  const myKey = dbKey(myPhone);
+  db.ref('notifications/'+myKey).limitToLast(30).once('value', s => {
+    const content = document.getElementById('modal-content');
+    if (!s.exists()){ content.innerHTML = '<div style="text-align:center;padding:30px;color:var(--sub);">🔔 Aucune notification</div>'; return; }
+    const notifs = [];
+    s.forEach(c => notifs.unshift({id:c.key, ...c.val()}));
+    content.innerHTML = `
+      <div class="flex-between" style="margin-bottom:8px;">
+        <span style="font-size:11px;color:var(--sub);">${notifs.length} notifications</span>
+        <button onclick="marquerToutLu()" class="btn btn-sm btn-outline">✓ Tout lire</button>
+      </div>
+      ${notifs.map(n => {
+        const time = new Date(n.date||Date.now()).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+        const confirmBtn = (n.type==='depot_entrant' && n.demandeId) ? `<button onclick="confirmerDepotClient('${n.demandeId}',${n.montant})" class="btn btn-xs btn-primary" style="margin-top:4px;">✅ Confirmer réception</button>` : '';
+        return `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;${!n.lu?'background:rgba(24,185,85,.05);':''}">
+          <div style="font-weight:700;font-size:12px;">${escapeHtml(n.titre||'')}</div>
+          <div style="color:var(--sub);font-size:11px;">${escapeHtml(n.message||'')}</div>
+          <div style="font-size:9px;color:var(--sub);">${time}</div>
+          ${confirmBtn}
+        </div>`;
+      }).join('')}
+    `;
+    notifs.forEach(n => { if (!n.lu) db.ref('notifications/'+myKey+'/'+n.id+'/lu').set(true); });
+    document.getElementById('notif-badge').classList.add('hidden');
+  });
+}
+function marquerToutLu(){
+  const myKey = dbKey(myPhone);
+  db.ref('notifications/'+myKey).once('value', s => {
+    if (!s.exists()) return;
+    s.forEach(c => db.ref('notifications/'+myKey+'/'+c.key+'/lu').set(true));
+    toast("✅ Tout marqué comme lu");
+    document.getElementById('notif-badge').classList.add('hidden');
+  });
+}
+
+// ============================================================
+// 21. PWA
+// ============================================================
+const swCode = `
+  const CACHE = 'ikapay-v31';
+  self.addEventListener('install', e => { self.skipWaiting(); });
+  self.addEventListener('activate', e => { self.clients.claim(); });
+  self.addEventListener('fetch', e => { if (e.request.method!=='GET') return; e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))); });
+`;
+if ('serviceWorker' in navigator){
+  const blob = new Blob([swCode], { type:'application/javascript' });
+  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+}
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; showInstallBanner(); });
+function showInstallBanner(){
+  if (document.getElementById('pwa-banner') || localStorage.getItem('pwa-dismissed')) return;
+  const banner = document.createElement('div');
+  banner.id = 'pwa-banner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;width:100%;z-index:99999;background:var(--tricolor);padding:9px 12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:slideDown .4s ease;';
+  banner.innerHTML = `
+    <style>@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}</style>
+    <div style="font-size:24px;">🇲🇱</div>
+    <div style="flex:1;"><div style="font-weight:900;color:#04140a;font-size:12px;">Installer IKAPAY</div><div style="color:rgba(4,20,10,.75);font-size:9px;">Accès rapide, comme une app</div></div>
+    <button onclick="installPWA()" style="background:#04140a;color:#fff;font-weight:900;font-size:10px;padding:5px 13px;border-radius:20px;border:none;width:auto;flex-shrink:0;">INSTALLER</button>
+    <button onclick="dismissBanner()" style="background:transparent;color:#04140a;font-size:17px;padding:0;width:20px;border:none;flex-shrink:0;">✕</button>`;
+  document.body.prepend(banner);
+  document.body.style.paddingTop = '48px';
+}
+function installPWA(){
+  if (!deferredPrompt) return alert("📱 Ajoutez IKAPAY via le menu de votre navigateur → \"Ajouter à l'écran d'accueil\".");
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(r => { if (r.outcome==='accepted') { toast("✅ IKAPAY installé !"); dismissBanner(); } deferredPrompt = null; });
+}
+function dismissBanner(){
+  const b = document.getElementById('pwa-banner');
+  if (b){ b.remove(); document.body.style.paddingTop = ''; }
+  localStorage.setItem('pwa-dismissed','1');
+}
+window.addEventListener('appinstalled', () => toast("🎉 IKAPAY installé !"));
+
+// ============================================================
+// 22. FONCTIONS GÉNÉRIQUES (clientConfirmeReception, etc.)
+// ============================================================
+function clientConfirmeReception(path, id, chauffeurPhone, prix){
+  if (!confirm("✅ Confirmez-vous avoir reçu le service / l'article ?")) return;
+  const chauffeurKey = dbKey(chauffeurPhone);
+  const comm = Math.round(prix*COMMISSION);
+  const net = prix - comm;
+  db.ref(path+'/'+id).update({ client_confirme:true, statut:'termine', dateTermine:Date.now() }).then(() => {
+    db.ref('users/'+dbKey(myPhone)+'/solde_bloque').transaction(v => Math.max(0,(v||0)-prix));
+    db.ref('users/'+chauffeurKey+'/solde').transaction(v => (v||0)+net);
+    db.ref('users/'+dbKey(ADMIN)+'/solde').transaction(v => (v||0)+comm);
+    const label = path==='taxi_requests' ? '🚕 COURSE TAXI' : path==='livraisons_colis' ? '📦 LIVRAISON' : '🛍️ VENTE IKASHOP';
+    logHistory(chauffeurKey, label, net);
+    toast(`✅ Confirmé ! Le prestataire a reçu ${net.toLocaleString()} CFA`);
+    if (path==='taxi_requests') openTaxi();
+    else if (path==='livraisons_colis') openLivreur();
+    else {
+      openShop();
+      db.ref(path+'/'+id).once('value', snap => {
+        const d = snap.val();
+        if (d && d.produitId) {
+          setTimeout(() => {
+            if (confirm(`📝 Souhaitez-vous noter "${d.produitNom}" (1 à 5 étoiles) ?`)) {
+              const note = parseInt(prompt("Donnez une note de 1 à 5 :", "5"));
+              if (note >= 1 && note <= 5) {
+                const commentaire = prompt("Votre commentaire (optionnel) :");
+                laisserAvisShop(d.produitId, note, commentaire);
+              }
+            }
+          }, 500);
+        }
+      });
+    }
+  });
+}
+
+function clientSignaleLitige(path, id){
+  if (!confirm("❌ Signaler que le service/l'article n'a pas été reçu ?\n\n⚠️ Un litige sera ouvert, l'admin va enquêter.")) return;
+  db.ref(path+'/'+id).update({ statut:'litige', dateLitige:Date.now(), raison:'Client signale non réception' }).then(() => {
+    envoyerNotification(dbKey(ADMIN), { type:'litige', titre:'🚨 Nouveau litige', message:`${me.name} signale un problème sur une commande.`, date:Date.now(), lu:false });
+    toast("📨 Litige signalé");
+    if (path==='taxi_requests') openTaxi();
+    else if (path==='livraisons_colis') openLivreur();
+    else openShop();
+  });
+}
+
+function lancerRemboursement(path, id, clientPhone, montant, delaiMinutes, serviceName){
+  setTimeout(() => {
+    db.ref(path+'/'+id).once('value', snap => {
+      const data = snap.val();
+      if (!data) return;
+      if (['en_attente','negociation','escrow'].includes(data.statut)){
+        const myKey = dbKey(clientPhone);
+        db.ref('users/'+myKey+'/solde').transaction(v => (v||0)+montant);
+        db.ref('users/'+myKey+'/solde_bloque').transaction(v => Math.max(0,(v||0)-montant));
+        db.ref(path+'/'+id).update({ statut:'rembourse', dateRemboursement:Date.now(), raison:'Délai dépassé - remboursement automatique' });
+        envoyerNotification(myKey, { type:'remboursement_auto', titre:'💸 Remboursement automatique', message:`${serviceName} (${montant.toLocaleString()} CFA) remboursé — personne n'a pris la demande à temps.`, date:Date.now(), lu:false });
+        logHistory(myKey, '💸 REMBOURSEMENT '+serviceName.toUpperCase(), montant);
+      }
+    });
+  }, delaiMinutes*60*1000);
+}
+
+function afficherMesCourses(snap, path, champDepart, champDest){
+  const div = document.getElementById(path==='taxi_requests' ? 'taxi-list' : 'livreur-list');
+  if (!div) return;
+  const actives = [], historique = [];
+  if (snap.exists()){
+    snap.forEach(c => {
+      const d = c.val();
+      if (['en_attente','en_cours','arrive','negociation'].includes(d.statut)) actives.push({id:c.key,...d});
+      else historique.push({id:c.key,...d});
+    });
+  }
+  let html = '';
+  if (actives.length){
+    html += `<h4 style="color:var(--gold);font-size:12px;margin:8px 0 4px;">📌 Mes demandes en cours (${actives.length})</h4>`;
+    actives.forEach(d => {
+      const montant = d.prix !== undefined ? d.prix : d.montant;
+      const v = VEHICULES[d.vehicule]||VEHICULES.voiture;
+      const label = path==='taxi_requests' ? `${v.emoji} ${escapeHtml(d[champDepart])} → ${escapeHtml(d[champDest])}` : `📦 ${escapeHtml(d.titre||'')}`;
+      const prestataireNom = d.chauffeur || d.livreur;
+      const prestatairePhone = d.chauffeurPhone || d.livreurPhone;
+      html += `
+        <div class="course-item" style="border-left:3px solid ${d.statut==='en_cours'?'var(--info)':d.statut==='arrive'?'var(--gold)':d.statut==='negociation'?'var(--orange)':'var(--sub)'};">
+          <div style="flex:1;">
+            <div style="font-weight:700;">${label}</div>
+            <div class="num" style="color:var(--sub);font-size:11px;">${montant.toLocaleString()} CFA · ${statutLabel(d.statut)}</div>
+            ${prestataireNom?`<div style="font-size:10px;color:var(--info);">👤 ${escapeHtml(prestataireNom)}</div>`:''}
+            ${d.prix_propose?`<div style="font-size:10px;color:var(--orange);">💰 Proposition : ${d.prix_propose.toLocaleString()} CFA</div>`:''}
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              ${d.statut==='en_attente' ? `<button onclick="annulerCourse('${path}','${d.id}','${d.prix!==undefined?'prix':'montant'}')" class="btn btn-xs btn-outline">❌ Annuler</button>` : ''}
+              ${d.statut==='arrive' && !d.client_confirme ? `
+                <button onclick="clientConfirmeReception('${path}','${d.id}','${prestatairePhone}',${montant})" class="btn btn-xs btn-primary">✅ Reçu</button>
+                <button onclick="clientSignaleLitige('${path}','${d.id}')" class="btn btn-xs btn-danger">❌ Pas reçu</button>` : ''}
+              ${d.statut==='negociation' && d.prix_propose ? `
+                <button onclick="repondreProposition('${path}','${d.id}',true)" class="btn btn-xs btn-primary">✅ Accepter</button>
+                <button onclick="repondreProposition('${path}','${d.id}',false)" class="btn btn-xs btn-danger">❌ Refuser</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+  if (historique.length){
+    html += `<h4 style="color:var(--sub);font-size:11px;margin:8px 0 4px;">📜 Historique (${historique.length})</h4>`;
+    historique.forEach(d => {
+      const montant = d.prix !== undefined ? d.prix : d.montant;
+      const label = path==='taxi_requests' ? `🚕 ${escapeHtml(d[champDepart])} → ${escapeHtml(d[champDest])}` : `📦 ${escapeHtml(d.titre||'')}`;
+      html += `
+        <div class="historique-item ${d.statut==='rembourse'?'rembourse':d.statut==='litige'?'litige':''}">
+          <div>${label}</div>
+          <div class="num" style="color:var(--sub);font-size:10px;">${montant.toLocaleString()} CFA · <span class="badge-status badge-${d.statut}">${statutLabel(d.statut)}</span></div>
+        </div>`;
+    });
+  }
+  if (!actives.length && !historique.length) html = `<div style="text-align:center;padding:26px;color:var(--sub);font-size:12px;">Aucune demande</div>`;
+  div.innerHTML = html + div.innerHTML;
+}
+
+function statutLabel(s){
+  return { en_attente:'⏳ En attente', en_cours:'🚗 En cours', arrive:'📍 Arrivé', negociation:'💬 Négociation',
+    termine:'✅ Terminé', rembourse:'💸 Remboursé', litige:'⚠️ Litige', annule:'❌ Annulé', refuse:'❌ Refusé' }[s] || s;
+}
+
+// ============================================================
+// TABLEAU DE BORD GROSSISTE
+// ============================================================
+function renderGrossisteDash(){
+  document.getElementById('dashboard-pro').innerHTML += `
+    <div class="card" style="border:1px solid #8B5CF6;">
+      <h3 style="color:#8B5CF6;font-size:13px;">📦 GROSSISTE</h3>
+      <p style="font-size:9.5px;color:var(--sub);margin-top:-4px;">Vendez vos lots en gros</p>
+      <div class="grid-2">
+        <div class="admin-stat"><div class="val" id="gros-ventes">0</div><div class="lbl">Ventes</div></div>
+        <div class="admin-stat"><div class="val num" id="gros-revenus">0 CFA</div><div class="lbl">Revenus</div></div>
+      </div>
+      <div id="gros-commandes-recues" style="max-height:150px;overflow-y:auto;margin-top:6px;"></div>
+    </div>
+  `;
+  const myKey = dbKey(myPhone);
+  db.ref('ika_grossiste_commandes').orderByChild('grossistePhone').equalTo(myKey).on('value', s => {
+    let ventes = 0, revenus = 0;
+    const list = document.getElementById('gros-commandes-recues');
+    if (list) {
+      list.innerHTML = '';
+      let count = 0;
+      s.forEach(c => {
+        const d = c.val();
+        if (d.statut === 'termine') {
+          ventes++;
+          revenus += d.prix;
+        }
+        count++;
+        list.innerHTML += `
+          <div style="font-size:10px;padding:4px 0;border-bottom:1px solid var(--border);">
+            📦 ${escapeHtml(d.produitNom)} · ${escapeHtml(d.client)} · ${d.prix.toLocaleString()} CFA · <span style="color:${d.statut==='termine'?'var(--green)':'var(--sub)'};">${statutLabel(d.statut)}</span>
+          </div>`;
+      });
+      if (count === 0) list.innerHTML = '<p style="color:var(--sub);font-size:10px;padding:4px;">Aucune commande reçue</p>';
+    }
+    document.getElementById('gros-ventes').innerText = ventes;
+    document.getElementById('gros-revenus').innerText = revenus.toLocaleString() + ' CFA';
+  });
+}
+
+console.log("✅ IKAPAY — Tous les modules sont prêts !");
+console.log("🇲🇱 AFRIQUE D'ABORD");
+</script>
+</body>
+</html>
